@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+
+<title>30秒タップチャレンジ | GOLDEN BOTTLE GAMES</title>
+
+<style>
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+  user-select:none;
+}
+
+body{
+  margin:0;
+  min-height:100vh;
+  background:
+    radial-gradient(circle at top,#292000 0,#0b0b0b 35%,#050505 100%);
+  color:white;
+  font-family:Arial,sans-serif;
+  text-align:center;
+  overflow-x:hidden;
+}
+
+header{
+  padding:20px;
+  font-size:13px;
+  letter-spacing:3px;
+  color:#ffd700;
+}
+
+.container{
+  width:min(92%,500px);
+  margin:auto;
+}
+
+h1{
+  font-size:30px;
+  margin:15px 0 5px;
+}
+
+.description{
+  color:#aaa;
+  margin-bottom:25px;
+}
+
+.stats{
+  display:flex;
+  gap:10px;
+  margin-bottom:20px;
+}
+
+.stat{
+  flex:1;
+  background:#111;
+  border:1px solid #333;
+  border-radius:14px;
+  padding:15px 5px;
+}
+
+.label{
+  color:#888;
+  font-size:11px;
+  letter-spacing:1px;
+}
+
+.value{
+  font-size:28px;
+  font-weight:bold;
+  margin-top:5px;
+}
+
+#time{
+  color:#ffd700;
+}
+
+#tapButton{
+  width:230px;
+  height:230px;
+  border-radius:50%;
+  border:7px solid #ffd700;
+  background:
+    radial-gradient(circle at 35% 30%,#fff176,#ffd700 25%,#d79b00 70%);
+  color:#111;
+  font-size:42px;
+  font-weight:900;
+  box-shadow:
+    0 0 25px rgba(255,215,0,.35),
+    inset 0 -12px 20px rgba(0,0,0,.25);
+  transition:transform .05s;
+  touch-action:manipulation;
+}
+
+#tapButton:active{
+  transform:scale(.92);
+}
+
+#tapButton.disabled{
+  filter:grayscale(1);
+  opacity:.35;
+}
+
+#message{
+  height:35px;
+  margin:18px 0 8px;
+  color:#ffd700;
+  font-weight:bold;
+}
+
+button.control{
+  width:100%;
+  padding:16px;
+  border:0;
+  border-radius:12px;
+  background:#ffd700;
+  color:#111;
+  font-size:17px;
+  font-weight:bold;
+  margin-top:10px;
+}
+
+.best{
+  color:#aaa;
+  font-size:14px;
+  margin:18px;
+}
+
+.back{
+  display:inline-block;
+  margin:25px 0 40px;
+  color:#888;
+  text-decoration:none;
+}
+
+.warning{
+  animation:warning .45s infinite alternate;
+}
+
+@keyframes warning{
+  from{
+    color:#ffd700;
+    transform:scale(1);
+  }
+  to{
+    color:#ff3b30;
+    transform:scale(1.18);
+  }
+}
+
+.pop{
+  position:fixed;
+  pointer-events:none;
+  color:#ffd700;
+  font-size:24px;
+  font-weight:bold;
+  animation:pop .55s forwards;
+}
+
+@keyframes pop{
+  from{
+    opacity:1;
+    transform:translateY(0) scale(1);
+  }
+  to{
+    opacity:0;
+    transform:translateY(-70px) scale(1.5);
+  }
+}
+
+.result{
+  background:#111;
+  border:1px solid #ffd700;
+  border-radius:16px;
+  padding:20px;
+  margin-top:20px;
+  display:none;
+}
+
+.rank{
+  font-size:60px;
+  color:#ffd700;
+  font-weight:900;
+}
+
+.shake{
+  animation:shake .12s;
+}
+
+@keyframes shake{
+  0%{transform:translateX(0)}
+  25%{transform:translateX(-5px)}
+  50%{transform:translateX(5px)}
+  75%{transform:translateX(-5px)}
+  100%{transform:translateX(0)}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+GOLDEN BOTTLE GAMES — GAME 001
+</header>
+
+<div class="container">
+
+<h1>🔥 30秒タップチャレンジ</h1>
+
+<div class="description">
+30秒間、限界まで連打せよ。
+</div>
+
+<div class="stats">
+
+<div class="stat">
+<div class="label">TIME</div>
+<div class="value" id="time">30</div>
+</div>
+
+<div class="stat">
+<div class="label">SCORE</div>
+<div class="value" id="score">0</div>
+</div>
+
+<div class="stat">
+<div class="label">COMBO</div>
+<div class="value" id="combo">0</div>
+</div>
+
+</div>
+
+<div id="message">
+STARTを押して挑戦開始
+</div>
+
+<button id="tapButton" class="disabled">
+TAP!
+</button>
+
+<div class="best">
+🏆 BEST SCORE：<span id="best">0</span>
+</div>
+
+<button class="control" id="startButton">
+▶ START
+</button>
+
+<div class="result" id="result">
+
+<div>
+YOUR RANK
+</div>
+
+<div class="rank" id="rank">
+-
+</div>
+
+<div id="resultScore">
+SCORE 0
+</div>
+
+</div>
+
+<a class="back" href="../../">
+← GOLDEN BOTTLE GAMES
+</a>
+
+</div>
+
+<script>
+
+let score = 0;
+let combo = 0;
+let time = 30;
+let playing = false;
+let timer;
+
+const tapButton =
+document.getElementById("tapButton");
+
+const startButton =
+document.getElementById("startButton");
+
+const scoreEl =
+document.getElementById("score");
+
+const comboEl =
+document.getElementById("combo");
+
+const timeEl =
+document.getElementById("time");
+
+const message =
+document.getElementById("message");
+
+const result =
+document.getElementById("result");
+
+const rankEl =
+document.getElementById("rank");
+
+const resultScore =
+document.getElementById("resultScore");
+
+const bestEl =
+document.getElementById("best");
+
+let best =
+Number(localStorage.getItem("gbgTapBest")) || 0;
+
+bestEl.textContent = best;
+
+
+startButton.addEventListener("click",startGame);
+
+
+tapButton.addEventListener("pointerdown",function(e){
+
+if(!playing) return;
+
+score++;
+combo++;
+
+scoreEl.textContent = score;
+comboEl.textContent = combo;
+
+createPop(e.clientX,e.clientY);
+
+if(combo % 25 === 0){
+
+document.body.classList.remove("shake");
+
+void document.body.offsetWidth;
+
+document.body.classList.add("shake");
+
+}
+
+});
+
+
+function startGame(){
+
+score = 0;
+combo = 0;
+time = 30;
+playing = true;
+
+scoreEl.textContent = 0;
+comboEl.textContent = 0;
+timeEl.textContent = 30;
+
+result.style.display = "none";
+
+tapButton.classList.remove("disabled");
+
+startButton.style.display = "none";
+
+message.textContent =
+"🔥 TAP! TAP! TAP!";
+
+timer = setInterval(function(){
+
+time--;
+
+timeEl.textContent = time;
+
+if(time <= 5){
+
+timeEl.classList.add("warning");
+
+message.textContent =
+"⚠️ あと " + time + " 秒！";
+
+}
+
+if(time <= 0){
+
+endGame();
+
+}
+
+},1000);
+
+}
+
+
+function endGame(){
+
+clearInterval(timer);
+
+playing = false;
+
+tapButton.classList.add("disabled");
+
+timeEl.classList.remove("warning");
+
+message.textContent =
+"FINISH!";
+
+if(score > best){
+
+best = score;
+
+localStorage.setItem(
+"gbgTapBest",
+best
+);
+
+bestEl.textContent = best;
+
+message.textContent =
+"🏆 NEW RECORD!";
+
+}
+
+let rank;
+
+if(score >= 250){
+rank = "S";
+}
+else if(score >= 200){
+rank = "A";
+}
+else if(score >= 150){
+rank = "B";
+}
+else if(score >= 100){
+rank = "C";
+}
+else{
+rank = "D";
+}
+
+rankEl.textContent = rank;
+
+resultScore.textContent =
+"SCORE " + score;
+
+result.style.display = "block";
+
+startButton.textContent =
+"↻ RETRY";
+
+startButton.style.display =
+"block";
+
+}
+
+
+function createPop(x,y){
+
+const pop =
+document.createElement("div");
+
+pop.className = "pop";
+
+pop.textContent = "+1";
+
+pop.style.left =
+(x - 10) + "px";
+
+pop.style.top =
+(y - 20) + "px";
+
+document.body.appendChild(pop);
+
+setTimeout(function(){
+
+pop.remove();
+
+},550);
+
+}
+
+</script>
+
+</body>
+</html>
