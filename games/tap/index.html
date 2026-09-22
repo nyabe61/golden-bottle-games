@@ -44,7 +44,7 @@ button{width:100%;border:0;border-radius:15px;padding:16px;font-size:20px;font-w
   <div class="panel">
    <div class="brand">GOLDEN BOTTLE GAMES</div><h1>🐱 ねこキャッチ！</h1>
    <div class="sub">魚を集めて、爆弾をよけろ！</div>
-   <div class="rules">🐟 魚　+10<br>🐠 レア魚　+30<br>✨ 金の魚　+100<br>🐭 ネズミ　+50<br>🐡 フグ　3秒スロー<br>🥫 猫缶　ライフ回復<br>💣 爆弾　ライフ -1<br><br>🐟 取り逃すとコンボ終了<br>📈 LEVELが上がるほど速く＆大量に！<br>🔥 10 COMBOでFEVER！</div>
+   <div class="rules">🐟 魚　+10<br>🐠 レア魚　+30<br>✨ 金の魚　+100<br>🐭 ネズミ　+50<br>🐡 フグ　3秒スロー<br>🥫 猫缶　ライフ回復<br>💣 爆弾　ライフ -1<br><br>🐟 普通の魚だけBANK +1<br>🐟 取り逃すとコンボ終了<br>📈 LEVELが上がるほど速く＆大量に！<br>🔥 10 COMBOでFEVER！</div>
    <div class="best">🏆 BEST <span id="bestStart">0</span>　🐟 <span id="bankStart">0</span></div>
    <button id="startBtn">▶ START</button><div class="small">猫を指で左右に動かそう</div>
   </div>
@@ -75,7 +75,7 @@ function moveCat(x){
 document.addEventListener("pointerdown",e=>{if(playing)moveCat(e.clientX)},{passive:false});
 document.addEventListener("pointermove",e=>{if(playing){e.preventDefault();moveCat(e.clientX)}},{passive:false});
 
-function bombChance(){return Math.min(.28,.06+level*.025)}
+function bombChance(){return Math.min(.30,.08+level*.025)}
 function randomItem(){
  const r=Math.random(),b=bombChance();
  if(r<b)return{icon:"💣",score:0,type:"bomb",speed:1.08};
@@ -114,7 +114,7 @@ function catchItem(it){
    slowUntil=performance.now()+3000;effect("SLOW!",it.x+30,it.y,"#70d7ff");vib(35);
  }
  combo++;caught++;maxCombo=Math.max(maxCombo,combo);
- if(["fish","rare","gold"].includes(it.data.type)){bank+=it.data.type==="gold"?5:it.data.type==="rare"?2:1;bankEl.textContent=bank;localStorage.setItem("gbgFishBank",bank)}
+ if(it.data.type==="fish"){bank+=1;bankEl.textContent=bank;localStorage.setItem("gbgFishBank",bank)}
  let m=combo>=20?5:combo>=10?3:combo>=5?2:1,pts=it.data.score*m*(fever?2:1);score+=pts;scoreEl.textContent=score;effect("+"+pts,it.x+30,it.y);
  if(combo>=2){comboEl.textContent=combo+" COMBO ×"+m;comboEl.classList.add("show")}
  if(combo===10&&!fever)startFever();vib(18);
