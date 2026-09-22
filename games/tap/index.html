@@ -2,13 +2,17 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
 <title>ねこキャッチ！ | G.B.G</title>
 
 <style>
 *{
   box-sizing:border-box;
   -webkit-tap-highlight-color:transparent;
+  -webkit-user-select:none;
   user-select:none;
 }
 
@@ -17,238 +21,325 @@ html,body{
   width:100%;
   height:100%;
   overflow:hidden;
-  background:#10131b;
+  touch-action:manipulation;
+  overscroll-behavior:none;
+  background:#090909;
   font-family:Arial,sans-serif;
   color:white;
 }
 
+body{
+  position:fixed;
+  inset:0;
+}
+
+/* ---------- GAME ---------- */
+
 #game{
   position:relative;
   width:100%;
-  height:100dvh;
-  max-width:600px;
-  margin:auto;
+  height:100%;
   overflow:hidden;
   background:
-    radial-gradient(circle at 50% 10%,#33486a 0%,transparent 35%),
-    linear-gradient(#151c2d 0%,#25233a 65%,#15131d 100%);
+    radial-gradient(circle at 50% 15%,#272000 0%,#111 35%,#050505 75%);
 }
 
-/* 星 */
-.star{
+/* ---------- HUD ---------- */
+
+#hud{
   position:absolute;
-  color:white;
-  opacity:.45;
+  top:0;
+  left:0;
+  width:100%;
+  z-index:20;
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  padding:
+    max(14px,env(safe-area-inset-top))
+    16px 10px;
   pointer-events:none;
 }
 
-/* 上部UI */
-#hud{
-  position:absolute;
-  top:env(safe-area-inset-top,10px);
-  left:0;
-  width:100%;
-  padding:14px 18px;
-  display:flex;
-  justify-content:space-between;
-  z-index:20;
-  font-weight:bold;
-  text-shadow:0 2px 5px #000;
+.hudBox{
+  background:rgba(0,0,0,.55);
+  border:1px solid #665700;
+  border-radius:14px;
+  padding:8px 12px;
+  backdrop-filter:blur(5px);
 }
 
-#score{
+.label{
+  color:#ffd700;
+  font-size:11px;
+  letter-spacing:2px;
+}
+
+.value{
   font-size:22px;
+  font-weight:900;
 }
 
 #life{
-  font-size:21px;
+  text-align:right;
+  font-size:20px;
 }
+
+/* ---------- COMBO ---------- */
 
 #combo{
   position:absolute;
-  top:70px;
-  width:100%;
-  text-align:center;
-  font-size:24px;
+  top:100px;
+  left:50%;
+  transform:translateX(-50%) scale(.7);
+  font-size:28px;
   font-weight:900;
-  color:#ffd84a;
+  color:#ffd700;
+  text-shadow:0 0 15px #ff8c00;
   opacity:0;
-  z-index:20;
-  transition:.15s;
+  z-index:30;
+  pointer-events:none;
 }
 
-/* 地面 */
+#combo.show{
+  animation:comboPop .35s ease;
+}
+
+@keyframes comboPop{
+  0%{opacity:0;transform:translateX(-50%) scale(.5)}
+  40%{opacity:1;transform:translateX(-50%) scale(1.25)}
+  100%{opacity:1;transform:translateX(-50%) scale(1)}
+}
+
+/* ---------- FEVER ---------- */
+
+#fever{
+  position:absolute;
+  top:145px;
+  width:100%;
+  text-align:center;
+  color:#fff;
+  font-size:34px;
+  font-weight:900;
+  letter-spacing:4px;
+  opacity:0;
+  z-index:25;
+  pointer-events:none;
+  text-shadow:
+    0 0 8px #fff,
+    0 0 15px #ffd700,
+    0 0 30px #ff8c00;
+}
+
+#game.fever{
+  animation:feverBG .45s infinite alternate;
+}
+
+#game.fever #fever{
+  opacity:1;
+}
+
+@keyframes feverBG{
+  from{filter:brightness(1)}
+  to{filter:brightness(1.25)}
+}
+
+/* ---------- FALLING ITEMS ---------- */
+
+.item{
+  position:absolute;
+  z-index:5;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:46px;
+  width:58px;
+  height:58px;
+  will-change:transform;
+  filter:drop-shadow(0 5px 5px rgba(0,0,0,.5));
+}
+
+/* ---------- CAT ---------- */
+
+#cat{
+  position:absolute;
+  bottom:42px;
+  left:50%;
+  transform:translateX(-50%);
+  width:100px;
+  height:100px;
+  z-index:10;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:82px;
+  filter:drop-shadow(0 8px 10px #000);
+  will-change:left;
+}
+
+#cat.hit{
+  animation:catHit .25s;
+}
+
+@keyframes catHit{
+  0%,100%{transform:translateX(-50%) rotate(0)}
+  25%{transform:translateX(-50%) rotate(-15deg)}
+  75%{transform:translateX(-50%) rotate(15deg)}
+}
+
+/* ---------- GROUND ---------- */
+
 #ground{
   position:absolute;
   bottom:0;
   width:100%;
-  height:16%;
-  background:linear-gradient(#28222e,#17141c);
-  border-top:3px solid #44394c;
+  height:40px;
+  background:linear-gradient(#282000,#080808);
+  border-top:2px solid #ffd700;
 }
 
-/* ネコ */
-#cat{
+/* ---------- EFFECT ---------- */
+
+.effect{
   position:absolute;
-  bottom:8%;
-  left:50%;
-  transform:translateX(-50%);
-  width:92px;
-  height:92px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:78px;
-  z-index:10;
-  filter:drop-shadow(0 7px 5px rgba(0,0,0,.5));
-  transition:transform .08s;
-}
-
-#cat.hit{
-  transform:translateX(-50%) scale(.8) rotate(-10deg);
-}
-
-/* 落下物 */
-.item{
-  position:absolute;
-  width:58px;
-  height:58px;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  font-size:48px;
-  z-index:8;
-  filter:drop-shadow(0 5px 3px rgba(0,0,0,.4));
-}
-
-.gold{
-  filter:
-    drop-shadow(0 0 8px #ffd700)
-    drop-shadow(0 0 18px #ff9d00);
-}
-
-/* ポイント表示 */
-.popup{
-  position:absolute;
-  font-size:24px;
+  z-index:40;
+  font-size:22px;
   font-weight:900;
   pointer-events:none;
-  z-index:30;
-  animation:pop .7s forwards;
+  animation:floatUp .7s forwards;
 }
 
-@keyframes pop{
-  0%{transform:translateY(0) scale(.7);opacity:1}
-  100%{transform:translateY(-70px) scale(1.3);opacity:0}
+@keyframes floatUp{
+  from{
+    opacity:1;
+    transform:translate(-50%,0) scale(.8);
+  }
+  to{
+    opacity:0;
+    transform:translate(-50%,-70px) scale(1.4);
+  }
 }
 
-/* スタート・ゲームオーバー */
+/* ---------- OVERLAY ---------- */
+
 .overlay{
   position:absolute;
   inset:0;
   z-index:100;
   display:flex;
-  flex-direction:column;
-  justify-content:center;
   align-items:center;
+  justify-content:center;
+  padding:25px;
+  background:rgba(0,0,0,.82);
+  backdrop-filter:blur(8px);
+}
+
+.panel{
+  width:min(430px,100%);
+  background:linear-gradient(145deg,#171717,#080808);
+  border:2px solid #ffd700;
+  border-radius:25px;
+  padding:28px 22px;
   text-align:center;
-  padding:30px;
-  background:rgba(7,8,13,.88);
-  backdrop-filter:blur(5px);
+  box-shadow:
+    0 0 25px rgba(255,215,0,.2),
+    inset 0 0 25px rgba(255,215,0,.05);
 }
 
-.titleCat{
-  font-size:100px;
-  margin-bottom:0;
-  animation:float 2s ease-in-out infinite;
-}
-
-@keyframes float{
-  50%{transform:translateY(-10px)}
+.logo{
+  font-size:12px;
+  letter-spacing:4px;
+  color:#ffd700;
 }
 
 h1{
-  margin:5px 0;
+  margin:12px 0 4px;
   font-size:38px;
 }
 
-.goldText{
-  color:#ffd52a;
+.subtitle{
+  color:#aaa;
+  margin-bottom:20px;
 }
 
-.description{
+.rules{
+  text-align:left;
+  background:#0d0d0d;
+  border-radius:15px;
+  padding:15px;
   line-height:1.8;
-  color:#ccc;
-  font-size:15px;
+  margin:18px 0;
+  font-size:14px;
+}
+
+.best{
+  color:#ffd700;
+  margin:12px;
+  font-weight:bold;
 }
 
 button{
-  margin-top:20px;
-  width:min(330px,90%);
+  width:100%;
   border:0;
-  border-radius:18px;
-  padding:18px;
-  font-size:21px;
+  border-radius:15px;
+  padding:17px;
+  font-size:20px;
   font-weight:900;
-  background:#ffd522;
-  color:#111;
-  box-shadow:0 6px 0 #aa7900;
+  background:#ffd700;
+  color:#080808;
+  cursor:pointer;
 }
 
 button:active{
-  transform:translateY(5px);
-  box-shadow:0 1px 0 #aa7900;
+  transform:scale(.97);
 }
 
-#finalScore{
-  font-size:55px;
-  font-weight:900;
-  color:#ffd522;
+.small{
+  margin-top:15px;
+  color:#777;
+  font-size:11px;
 }
 
-#best{
-  color:#aaa;
-  margin-top:8px;
-}
+/* ---------- RESULT ---------- */
 
-.hidden{
+#result{
   display:none;
 }
 
-/* フィーバー */
-#fever{
+#finalScore{
+  color:#ffd700;
+  font-size:54px;
+  font-weight:900;
+  margin:5px;
+}
+
+#rank{
+  font-size:60px;
+  font-weight:900;
+  margin:5px;
+  text-shadow:0 0 20px #ffd700;
+}
+
+/* ---------- DAMAGE FLASH ---------- */
+
+#damage{
   position:absolute;
   inset:0;
-  pointer-events:none;
-  border:0 solid #ffd700;
-  z-index:40;
-}
-
-#fever.active{
-  animation:fever .4s infinite alternate;
-}
-
-@keyframes fever{
-  from{
-    box-shadow:inset 0 0 25px #ffd700;
-  }
-  to{
-    box-shadow:inset 0 0 70px #ff8a00;
-  }
-}
-
-#feverText{
-  position:absolute;
-  top:115px;
-  width:100%;
-  text-align:center;
-  font-size:31px;
-  font-weight:900;
-  color:#ffd700;
-  z-index:50;
+  background:#ff0000;
   opacity:0;
-  text-shadow:0 0 15px #ff8a00;
+  z-index:50;
+  pointer-events:none;
 }
+
+#damage.flash{
+  animation:damageFlash .25s;
+}
+
+@keyframes damageFlash{
+  0%{opacity:.55}
+  100%{opacity:0}
+}
+
 </style>
 </head>
 
@@ -257,413 +348,686 @@ button:active{
 <div id="game">
 
   <div id="hud">
-    <div id="score">SCORE 0</div>
-    <div id="life">❤️❤️❤️</div>
-  </div>
 
-  <div id="combo">COMBO × 0</div>
-  <div id="feverText">✨ FEVER TIME! ✨</div>
-  <div id="fever"></div>
-
-  <div id="cat">🐱</div>
-  <div id="ground"></div>
-
-  <div id="startScreen" class="overlay">
-    <div class="titleCat">🐱</div>
-
-    <h1>
-      ねこ<span class="goldText">キャッチ！</span>
-    </h1>
-
-    <div class="description">
-      🐟 魚をキャッチしてポイントGET！<br>
-      ✨ 金の魚は高得点！<br>
-      💣 爆弾には気をつけろ！<br><br>
-      画面を左右になぞってネコを動かそう
+    <div class="hudBox">
+      <div class="label">SCORE</div>
+      <div class="value" id="score">0</div>
     </div>
 
-    <button id="startBtn">GAME START</button>
+    <div class="hudBox" id="life">
+      ❤️❤️❤️
+    </div>
+
   </div>
 
-  <div id="gameOver" class="overlay hidden">
-    <div style="font-size:70px">😿</div>
-    <h1>GAME OVER</h1>
+  <div id="combo">COMBO × 2</div>
+  <div id="fever">🔥 FEVER 🔥</div>
 
-    <div>YOUR SCORE</div>
-    <div id="finalScore">0</div>
-    <div id="best">BEST 0</div>
+  <div id="cat">🐱</div>
 
-    <button id="retryBtn">もう一回！</button>
+  <div id="ground"></div>
+  <div id="damage"></div>
+
+  <!-- START -->
+
+  <div class="overlay" id="start">
+
+    <div class="panel">
+
+      <div class="logo">GOLDEN BOTTLE GAMES</div>
+
+      <h1>🐱 ねこキャッチ！</h1>
+
+      <div class="subtitle">
+        落ちてくるごはんを全部いただけ！
+      </div>
+
+      <div class="rules">
+        🐟 魚　<strong>+10</strong><br>
+        🐠 レア魚　<strong>+30</strong><br>
+        ✨ 金の魚　<strong>+100</strong><br>
+        🐭 ネズミ　<strong>ボーナス</strong><br>
+        💣 爆弾　<strong>ライフ -1</strong><br><br>
+
+        🔥 連続キャッチでコンボ！<br>
+        ⚡ コンボをつなげてFEVER！
+      </div>
+
+      <div class="best">
+        🏆 BEST <span id="bestStart">0</span>
+      </div>
+
+      <button id="startBtn">
+        ▶ START
+      </button>
+
+      <div class="small">
+        猫を指で左右に動かそう
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- RESULT -->
+
+  <div class="overlay" id="result">
+
+    <div class="panel">
+
+      <div class="logo">GAME OVER</div>
+
+      <div id="rank">A</div>
+
+      <div>YOUR SCORE</div>
+
+      <div id="finalScore">
+        0
+      </div>
+
+      <div class="best">
+        🏆 BEST <span id="bestResult">0</span>
+      </div>
+
+      <div class="rules" style="text-align:center">
+        🐟 キャッチ数：
+        <strong id="caughtResult">0</strong>
+        <br>
+
+        🔥 最大コンボ：
+        <strong id="comboResult">0</strong>
+      </div>
+
+      <button id="retryBtn">
+        ↻ RETRY
+      </button>
+
+      <div class="small">
+        G.B.G — SMALL GAMES. BIG FUN.
+      </div>
+
+    </div>
+
   </div>
 
 </div>
 
 <script>
+
 const game = document.getElementById("game");
 const cat = document.getElementById("cat");
+
 const scoreEl = document.getElementById("score");
 const lifeEl = document.getElementById("life");
+
+const startScreen = document.getElementById("start");
+const resultScreen = document.getElementById("result");
+
 const comboEl = document.getElementById("combo");
-
-const startScreen = document.getElementById("startScreen");
-const gameOverScreen = document.getElementById("gameOver");
-
-const finalScoreEl = document.getElementById("finalScore");
-const bestEl = document.getElementById("best");
-
-const fever = document.getElementById("fever");
-const feverText = document.getElementById("feverText");
+const damageEl = document.getElementById("damage");
 
 let playing = false;
+
 let score = 0;
-let lives = 3;
+let life = 3;
+
 let combo = 0;
+let maxCombo = 0;
 
-let catX = 0;
-let spawnTimer;
-let difficultyTimer;
+let caught = 0;
 
-let spawnRate = 850;
-let speedBase = 3.3;
+let items = [];
 
-let feverMode = false;
-let feverTimeout;
+let spawnTimer = 0;
+let lastTime = 0;
 
-function createStars(){
-  for(let i=0;i<30;i++){
-    const s=document.createElement("div");
-    s.className="star";
-    s.textContent="•";
-    s.style.left=Math.random()*100+"%";
-    s.style.top=Math.random()*70+"%";
-    s.style.fontSize=(10+Math.random()*20)+"px";
-    game.appendChild(s);
+let difficulty = 1;
+
+let fever = false;
+let feverTimer = 0;
+
+let best =
+  Number(localStorage.getItem("gbgCatBest") || 0);
+
+document.getElementById("bestStart").textContent = best;
+
+/* ---------------- CAT CONTROL ---------------- */
+
+function moveCat(x){
+
+  const half = 50;
+
+  let newX = Math.max(
+    half,
+    Math.min(window.innerWidth-half,x)
+  );
+
+  cat.style.left = newX+"px";
+}
+
+document.addEventListener(
+  "touchmove",
+  e=>{
+    if(!playing) return;
+
+    e.preventDefault();
+
+    moveCat(e.touches[0].clientX);
+  },
+  {passive:false}
+);
+
+document.addEventListener(
+  "touchstart",
+  e=>{
+    if(!playing) return;
+
+    moveCat(e.touches[0].clientX);
+  },
+  {passive:false}
+);
+
+document.addEventListener(
+  "mousemove",
+  e=>{
+    if(playing) moveCat(e.clientX);
   }
-}
+);
 
-createStars();
+/* ---------------- ITEM DATA ---------------- */
 
-function setCatPosition(clientX){
-  const rect=game.getBoundingClientRect();
+function randomItem(){
 
-  let x=clientX-rect.left;
+  const r=Math.random();
 
-  const half=46;
-  x=Math.max(half,Math.min(rect.width-half,x));
-
-  catX=x;
-  cat.style.left=x+"px";
-}
-
-game.addEventListener("pointerdown",e=>{
-  if(!playing)return;
-  setCatPosition(e.clientX);
-});
-
-game.addEventListener("pointermove",e=>{
-  if(!playing || e.buttons===0)return;
-  setCatPosition(e.clientX);
-});
-
-function updateHUD(){
-  scoreEl.textContent="SCORE "+score;
-
-  lifeEl.textContent=
-    "❤️".repeat(Math.max(0,lives))+
-    "🖤".repeat(Math.max(0,3-lives));
-
-  if(combo>=2){
-    comboEl.style.opacity=1;
-    comboEl.textContent="COMBO × "+combo;
-  }else{
-    comboEl.style.opacity=0;
+  if(r < .08){
+    return{
+      icon:"💣",
+      score:0,
+      type:"bomb",
+      speed:1.1
+    };
   }
+
+  if(r < .15){
+    return{
+      icon:"✨",
+      score:100,
+      type:"gold",
+      speed:1.15
+    };
+  }
+
+  if(r < .25){
+    return{
+      icon:"🐭",
+      score:50,
+      type:"mouse",
+      speed:1.45
+    };
+  }
+
+  if(r < .45){
+    return{
+      icon:"🐠",
+      score:30,
+      type:"rare",
+      speed:1.1
+    };
+  }
+
+  return{
+    icon:"🐟",
+    score:10,
+    type:"fish",
+    speed:1
+  };
 }
+
+/* ---------------- SPAWN ---------------- */
 
 function spawnItem(){
 
-  if(!playing)return;
+  const data=randomItem();
 
-  const item=document.createElement("div");
-  item.className="item";
+  const el=document.createElement("div");
 
-  const random=Math.random();
+  el.className="item";
+  el.textContent=data.icon;
 
-  let type;
-  let emoji;
+  const x=
+    15+
+    Math.random()*
+    (window.innerWidth-80);
 
-  if(random<0.14){
-    type="bomb";
-    emoji="💣";
-  }
-  else if(random<0.25){
-    type="gold";
-    emoji="🐠";
-    item.classList.add("gold");
-  }
-  else{
-    type="fish";
-    emoji="🐟";
-  }
+  el.style.left=x+"px";
+  el.style.top="-70px";
 
-  item.dataset.type=type;
-  item.textContent=emoji;
+  game.appendChild(el);
 
-  const maxX=game.clientWidth-60;
-
-  item.style.left=
-    Math.max(2,Math.random()*maxX)+"px";
-
-  item.style.top="-70px";
-
-  game.appendChild(item);
-
-  let y=-70;
-
-  const speed=
-    speedBase+
-    Math.random()*1.8+
-    (feverMode ? 1.5 : 0);
-
-  function fall(){
-
-    if(!playing){
-      item.remove();
-      return;
-    }
-
-    y+=speed;
-    item.style.top=y+"px";
-
-    const itemRect=item.getBoundingClientRect();
-    const catRect=cat.getBoundingClientRect();
-
-    const hit=
-      itemRect.bottom>catRect.top+15 &&
-      itemRect.top<catRect.bottom &&
-      itemRect.right>catRect.left+12 &&
-      itemRect.left<catRect.right-12;
-
-    if(hit){
-      collect(item,type);
-      return;
-    }
-
-    if(y>game.clientHeight){
-      item.remove();
-
-      if(type!=="bomb"){
-        combo=0;
-        updateHUD();
-      }
-
-      return;
-    }
-
-    requestAnimationFrame(fall);
-  }
-
-  requestAnimationFrame(fall);
+  items.push({
+    el:el,
+    x:x,
+    y:-70,
+    speed:
+      (3.2 + difficulty*.25)
+      *data.speed,
+    data:data
+  });
 }
 
-function collect(item,type){
+/* ---------------- EFFECT ---------------- */
 
-  const rect=item.getBoundingClientRect();
-  const gameRect=game.getBoundingClientRect();
+function effect(text,x,y,color="#ffd700"){
 
-  if(type==="bomb"){
+  const e=document.createElement("div");
 
-    lives--;
+  e.className="effect";
+  e.textContent=text;
+
+  e.style.left=x+"px";
+  e.style.top=y+"px";
+  e.style.color=color;
+
+  game.appendChild(e);
+
+  setTimeout(
+    ()=>e.remove(),
+    700
+  );
+}
+
+/* ---------------- CATCH ---------------- */
+
+function catchItem(item){
+
+  const data=item.data;
+
+  if(data.type==="bomb"){
+
+    life--;
+
     combo=0;
 
-    popup(
-      "💥 -1 LIFE",
-      rect.left-gameRect.left,
-      rect.top-gameRect.top,
-      "#ff5353"
-    );
+    lifeEl.textContent=
+      "❤️".repeat(Math.max(0,life))
+      +"🖤".repeat(3-Math.max(0,life));
 
+    damageEl.classList.remove("flash");
+    void damageEl.offsetWidth;
+    damageEl.classList.add("flash");
+
+    cat.classList.remove("hit");
+    void cat.offsetWidth;
     cat.classList.add("hit");
 
-    setTimeout(()=>{
-      cat.classList.remove("hit");
-    },180);
-
-    if(navigator.vibrate){
-      navigator.vibrate(120);
-    }
-
-    if(lives<=0){
-      item.remove();
-      updateHUD();
-      endGame();
-      return;
-    }
-
-  }else{
-
-    combo++;
-
-    let points=100;
-
-    if(type==="gold"){
-      points=500;
-    }
-
-    const multiplier=
-      Math.min(5,1+Math.floor(combo/5));
-
-    points*=multiplier;
-
-    if(feverMode){
-      points*=2;
-    }
-
-    score+=points;
-
-    popup(
-      "+"+points,
-      rect.left-gameRect.left,
-      rect.top-gameRect.top,
-      type==="gold" ? "#ffd700" : "#ffffff"
+    effect(
+      "BOOM!",
+      item.x+30,
+      item.y,
+      "#ff4444"
     );
 
-    if(combo===10 || combo===25){
-      startFever();
+    vibrate([60,40,80]);
+
+    if(life<=0){
+      endGame();
     }
+
+    return;
   }
 
-  item.remove();
-  updateHUD();
+  combo++;
+  caught++;
+
+  maxCombo=Math.max(
+    maxCombo,
+    combo
+  );
+
+  let multiplier=1;
+
+  if(combo>=5) multiplier=2;
+  if(combo>=10) multiplier=3;
+  if(combo>=20) multiplier=5;
+
+  let points=
+    data.score*
+    multiplier;
+
+  if(fever){
+    points*=2;
+  }
+
+  score+=points;
+
+  scoreEl.textContent=score;
+
+  effect(
+    "+"+points,
+    item.x+30,
+    item.y
+  );
+
+  if(combo>=2){
+
+    comboEl.textContent=
+      "COMBO × "+combo;
+
+    comboEl.classList.remove("show");
+
+    void comboEl.offsetWidth;
+
+    comboEl.classList.add("show");
+  }
+
+  if(combo===10){
+    startFever();
+  }
+
+  vibrate(18);
 }
 
-function popup(text,x,y,color){
-
-  const p=document.createElement("div");
-
-  p.className="popup";
-  p.textContent=text;
-
-  p.style.left=x+"px";
-  p.style.top=y+"px";
-  p.style.color=color;
-
-  game.appendChild(p);
-
-  setTimeout(()=>{
-    p.remove();
-  },700);
-}
+/* ---------------- FEVER ---------------- */
 
 function startFever(){
 
-  if(feverMode)return;
+  fever=true;
 
-  feverMode=true;
+  feverTimer=5000;
 
-  fever.classList.add("active");
-  feverText.style.opacity=1;
+  game.classList.add("fever");
 
-  clearTimeout(feverTimeout);
+  effect(
+    "FEVER!!",
+    window.innerWidth/2,
+    window.innerHeight/2,
+    "#ffffff"
+  );
 
-  feverTimeout=setTimeout(()=>{
-    feverMode=false;
-    fever.classList.remove("active");
-    feverText.style.opacity=0;
-  },5000);
+  vibrate([40,30,40,30,100]);
 }
+
+function stopFever(){
+
+  fever=false;
+
+  game.classList.remove("fever");
+}
+
+/* ---------------- VIBRATION ---------------- */
+
+function vibrate(pattern){
+
+  if(navigator.vibrate){
+    navigator.vibrate(pattern);
+  }
+}
+
+/* ---------------- COLLISION ---------------- */
+
+function collision(item){
+
+  const a=item.el.getBoundingClientRect();
+  const b=cat.getBoundingClientRect();
+
+  return !(
+    a.right < b.left+15 ||
+    a.left > b.right-15 ||
+    a.bottom < b.top+15 ||
+    a.top > b.bottom-5
+  );
+}
+
+/* ---------------- LOOP ---------------- */
+
+function loop(time){
+
+  if(!playing) return;
+
+  const delta=
+    Math.min(
+      32,
+      time-lastTime || 16
+    );
+
+  lastTime=time;
+
+  spawnTimer-=delta;
+
+  difficulty+=
+    delta/30000;
+
+  if(spawnTimer<=0){
+
+    spawnItem();
+
+    const base=
+      Math.max(
+        280,
+        850-difficulty*45
+      );
+
+    spawnTimer=
+      base+
+      Math.random()*250;
+
+    if(fever){
+      spawnTimer*=.55;
+    }
+  }
+
+  if(fever){
+
+    feverTimer-=delta;
+
+    if(feverTimer<=0){
+      stopFever();
+    }
+  }
+
+  for(
+    let i=items.length-1;
+    i>=0;
+    i--
+  ){
+
+    const item=items[i];
+
+    item.y +=
+      item.speed*
+      (delta/16);
+
+    item.el.style.transform=
+      `translateY(${item.y+70}px)`;
+
+    if(collision(item)){
+
+      catchItem(item);
+
+      item.el.remove();
+
+      items.splice(i,1);
+
+      continue;
+    }
+
+    if(item.y >
+       window.innerHeight+80){
+
+      /* 魚を落とすとコンボ終了 */
+
+      if(item.data.type!=="bomb"){
+
+        combo=0;
+
+        comboEl.classList.remove("show");
+      }
+
+      item.el.remove();
+
+      items.splice(i,1);
+    }
+  }
+
+  requestAnimationFrame(loop);
+}
+
+/* ---------------- START ---------------- */
 
 function startGame(){
 
-  document
-    .querySelectorAll(".item,.popup")
-    .forEach(el=>el.remove());
+  items.forEach(
+    i=>i.el.remove()
+  );
+
+  items=[];
 
   score=0;
-  lives=3;
+  life=3;
   combo=0;
+  maxCombo=0;
+  caught=0;
 
-  spawnRate=850;
-  speedBase=3.3;
-  feverMode=false;
+  difficulty=1;
 
-  fever.classList.remove("active");
-  feverText.style.opacity=0;
+  fever=false;
+  feverTimer=0;
+
+  spawnTimer=400;
+
+  scoreEl.textContent="0";
+  lifeEl.textContent="❤️❤️❤️";
+
+  comboEl.classList.remove("show");
+  game.classList.remove("fever");
+
+  startScreen.style.display="none";
+  resultScreen.style.display="none";
 
   playing=true;
 
-  startScreen.classList.add("hidden");
-  gameOverScreen.classList.add("hidden");
+  lastTime=performance.now();
 
-  catX=game.clientWidth/2;
-  cat.style.left=catX+"px";
-
-  updateHUD();
-
-  scheduleSpawn();
-
-  difficultyTimer=setInterval(()=>{
-
-    spawnRate=Math.max(330,spawnRate-65);
-    speedBase=Math.min(8,speedBase+.35);
-
-  },5000);
+  requestAnimationFrame(loop);
 }
 
-function scheduleSpawn(){
-
-  if(!playing)return;
-
-  spawnItem();
-
-  const next=
-    feverMode
-      ? Math.max(180,spawnRate*.45)
-      : spawnRate;
-
-  spawnTimer=setTimeout(
-    scheduleSpawn,
-    next
-  );
-}
+/* ---------------- END ---------------- */
 
 function endGame(){
 
   playing=false;
 
-  clearTimeout(spawnTimer);
-  clearInterval(difficultyTimer);
-  clearTimeout(feverTimeout);
+  stopFever();
 
-  feverMode=false;
-  fever.classList.remove("active");
-  feverText.style.opacity=0;
+  items.forEach(
+    i=>i.el.remove()
+  );
 
-  document
-    .querySelectorAll(".item")
-    .forEach(el=>el.remove());
-
-  let best=
-    Number(localStorage.getItem("gbgCatBest")||0);
+  items=[];
 
   if(score>best){
+
     best=score;
-    localStorage.setItem("gbgCatBest",best);
+
+    localStorage.setItem(
+      "gbgCatBest",
+      best
+    );
   }
 
-  finalScoreEl.textContent=score;
-  bestEl.textContent="BEST "+best;
+  const totalCaught=
+    Number(
+      localStorage.getItem(
+        "gbgCatCaught"
+      ) || 0
+    ) + caught;
 
-  gameOverScreen.classList.remove("hidden");
+  localStorage.setItem(
+    "gbgCatCaught",
+    totalCaught
+  );
+
+  let rank="D";
+
+  if(score>=300) rank="C";
+  if(score>=700) rank="B";
+  if(score>=1500) rank="A";
+  if(score>=3000) rank="S";
+  if(score>=5000) rank="SS";
+
+  document.getElementById(
+    "rank"
+  ).textContent=rank;
+
+  document.getElementById(
+    "finalScore"
+  ).textContent=score;
+
+  document.getElementById(
+    "bestResult"
+  ).textContent=best;
+
+  document.getElementById(
+    "caughtResult"
+  ).textContent=caught;
+
+  document.getElementById(
+    "comboResult"
+  ).textContent=maxCombo;
+
+  resultScreen.style.display="flex";
 }
 
-document
-  .getElementById("startBtn")
-  .addEventListener("click",startGame);
+/* ---------------- BUTTONS ---------------- */
 
-document
-  .getElementById("retryBtn")
-  .addEventListener("click",startGame);
+document.getElementById(
+  "startBtn"
+).addEventListener(
+  "click",
+  startGame
+);
+
+document.getElementById(
+  "retryBtn"
+).addEventListener(
+  "click",
+  startGame
+);
+
+/* iOS gesture zoom prevention */
+
+document.addEventListener(
+  "gesturestart",
+  e=>e.preventDefault()
+);
+
+document.addEventListener(
+  "gesturechange",
+  e=>e.preventDefault()
+);
+
+document.addEventListener(
+  "gestureend",
+  e=>e.preventDefault()
+);
+
+let lastTouchEnd=0;
+
+document.addEventListener(
+  "touchend",
+  e=>{
+
+    const now=Date.now();
+
+    if(now-lastTouchEnd<=300){
+      e.preventDefault();
+    }
+
+    lastTouchEnd=now;
+  },
+  {passive:false}
+);
 
 </script>
 
