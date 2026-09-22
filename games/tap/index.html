@@ -34,7 +34,7 @@ button{width:100%;border:0;border-radius:15px;padding:16px;font-size:20px;font-w
 <body>
 <div id="game">
  <div id="hud">
-  <div class="box"><div class="label">SCORE</div><div class="value" id="score">0</div><div class="label">LEVEL <span id="level">1</span>　MISS <span id="miss">0</span>/3</div><div class="label">🐟 BANK <span id="bank">0</span></div></div>
+  <div class="box"><div class="label">SCORE</div><div class="value" id="score">0</div><div class="label">LEVEL <span id="level">1</span></div><div class="label">🐟 BANK <span id="bank">0</span></div></div>
   <div class="box right"><div class="label">LIFE</div><div class="value" id="life">❤️❤️❤️</div></div>
  </div>
  <div id="combo"></div><div id="fever">🔥 FEVER 🔥</div>
@@ -44,7 +44,7 @@ button{width:100%;border:0;border-radius:15px;padding:16px;font-size:20px;font-w
   <div class="panel">
    <div class="brand">GOLDEN BOTTLE GAMES</div><h1>🐱 ねこキャッチ！</h1>
    <div class="sub">魚を集めて、爆弾をよけろ！</div>
-   <div class="rules">🐟 魚　+10<br>🐠 レア魚　+30<br>✨ 金の魚　+100<br>🐭 ネズミ　+50<br>🐡 フグ　3秒スロー<br>🥫 猫缶　ライフ回復<br>💣 爆弾　ライフ -1<br><br>🐟 魚を3匹逃すとライフ -1<br>📈 LEVELが上がるほど速く＆大量に！<br>🔥 10 COMBOでFEVER！</div>
+   <div class="rules">🐟 魚　+10<br>🐠 レア魚　+30<br>✨ 金の魚　+100<br>🐭 ネズミ　+50<br>🐡 フグ　3秒スロー<br>🥫 猫缶　ライフ回復<br>💣 爆弾　ライフ -1<br><br>🐟 取り逃すとコンボ終了<br>📈 LEVELが上がるほど速く＆大量に！<br>🔥 10 COMBOでFEVER！</div>
    <div class="best">🏆 BEST <span id="bestStart">0</span>　🐟 <span id="bankStart">0</span></div>
    <button id="startBtn">▶ START</button><div class="small">猫を指で左右に動かそう</div>
   </div>
@@ -60,9 +60,9 @@ button{width:100%;border:0;border-radius:15px;padding:16px;font-size:20px;font-w
  </div>
 </div>
 <script>
-const game=document.getElementById("game"),cat=document.getElementById("cat"),scoreEl=document.getElementById("score"),lifeEl=document.getElementById("life"),levelEl=document.getElementById("level"),missEl=document.getElementById("miss"),bankEl=document.getElementById("bank"),comboEl=document.getElementById("combo"),damageEl=document.getElementById("damage");
+const game=document.getElementById("game"),cat=document.getElementById("cat"),scoreEl=document.getElementById("score"),lifeEl=document.getElementById("life"),levelEl=document.getElementById("level"),bankEl=document.getElementById("bank"),comboEl=document.getElementById("combo"),damageEl=document.getElementById("damage");
 const startScreen=document.getElementById("start"),resultScreen=document.getElementById("result");
-let playing=false,score=0,life=3,miss=0,combo=0,maxCombo=0,caught=0,items=[],spawnTimer=0,lastTime=0,elapsed=0,level=1,fever=false,feverTimer=0,slowUntil=0;
+let playing=false,score=0,life=3,combo=0,maxCombo=0,caught=0,items=[],spawnTimer=0,lastTime=0,elapsed=0,level=1,fever=false,feverTimer=0,slowUntil=0;
 let best=Number(localStorage.getItem("gbgCatBest")||0),bank=Number(localStorage.getItem("gbgFishBank")||0);document.getElementById("bestStart").textContent=best;document.getElementById("bankStart").textContent=bank;bankEl.textContent=bank;
 
 function moveCat(x){
@@ -135,8 +135,7 @@ function loop(t){
   if(collide(it)){catchItem(it);it.el.remove();items.splice(i,1);continue}
   if(it.y>innerHeight+80){
    if(["fish","rare","gold","mouse"].includes(it.data.type)){
-     combo=0;comboEl.classList.remove("show");miss++;missEl.textContent=miss;
-     if(miss>=3){miss=0;missEl.textContent=0;loseLife("3 MISS!");if(!playing)return}
+     combo=0;comboEl.classList.remove("show");
    }
    it.el.remove();items.splice(i,1)
   }
@@ -144,8 +143,8 @@ function loop(t){
  requestAnimationFrame(loop);
 }
 function startGame(){
- items.forEach(i=>i.el.remove());items=[];score=0;life=3;miss=0;combo=0;maxCombo=0;caught=0;elapsed=0;level=1;fever=false;feverTimer=0;slowUntil=0;spawnTimer=350;
- scoreEl.textContent=0;levelEl.textContent=1;missEl.textContent=0;lifeEl.textContent="❤️❤️❤️";comboEl.classList.remove("show");game.classList.remove("fever");startScreen.style.display="none";resultScreen.style.display="none";
+ items.forEach(i=>i.el.remove());items=[];score=0;life=3;combo=0;maxCombo=0;caught=0;elapsed=0;level=1;fever=false;feverTimer=0;slowUntil=0;spawnTimer=350;
+ scoreEl.textContent=0;levelEl.textContent=1;lifeEl.textContent="❤️❤️❤️";comboEl.classList.remove("show");game.classList.remove("fever");startScreen.style.display="none";resultScreen.style.display="none";
  playing=true;lastTime=performance.now();requestAnimationFrame(loop);
 }
 function endGame(){
