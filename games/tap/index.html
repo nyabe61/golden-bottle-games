@@ -34,7 +34,7 @@ button{width:100%;border:0;border-radius:15px;padding:16px;font-size:20px;font-w
 <body>
 <div id="game">
  <div id="hud">
-  <div class="box"><div class="label">SCORE</div><div class="value" id="score">0</div><div class="label">LEVEL <span id="level">1</span>　MISS <span id="miss">0</span>/3</div></div>
+  <div class="box"><div class="label">SCORE</div><div class="value" id="score">0</div><div class="label">LEVEL <span id="level">1</span>　MISS <span id="miss">0</span>/3</div><div class="label">🐟 BANK <span id="bank">0</span></div></div>
   <div class="box right"><div class="label">LIFE</div><div class="value" id="life">❤️❤️❤️</div></div>
  </div>
  <div id="combo"></div><div id="fever">🔥 FEVER 🔥</div>
@@ -45,7 +45,7 @@ button{width:100%;border:0;border-radius:15px;padding:16px;font-size:20px;font-w
    <div class="brand">GOLDEN BOTTLE GAMES</div><h1>🐱 ねこキャッチ！</h1>
    <div class="sub">魚を集めて、爆弾をよけろ！</div>
    <div class="rules">🐟 魚　+10<br>🐠 レア魚　+30<br>✨ 金の魚　+100<br>🐭 ネズミ　+50<br>🐡 フグ　3秒スロー<br>🥫 猫缶　ライフ回復<br>💣 爆弾　ライフ -1<br><br>🐟 魚を3匹逃すとライフ -1<br>📈 LEVELが上がるほど速く＆大量に！<br>🔥 10 COMBOでFEVER！</div>
-   <div class="best">🏆 BEST <span id="bestStart">0</span></div>
+   <div class="best">🏆 BEST <span id="bestStart">0</span>　🐟 <span id="bankStart">0</span></div>
    <button id="startBtn">▶ START</button><div class="small">猫を指で左右に動かそう</div>
   </div>
  </div>
@@ -54,16 +54,16 @@ button{width:100%;border:0;border-radius:15px;padding:16px;font-size:20px;font-w
   <div class="panel">
    <div class="brand">GAME OVER</div><div id="rank">D</div><div>YOUR SCORE</div><div id="finalScore">0</div>
    <div class="best">🏆 BEST <span id="bestResult">0</span></div>
-   <div class="rules" style="text-align:center">🐟 キャッチ数：<b id="caughtResult">0</b><br>🔥 最大コンボ：<b id="comboResult">0</b><br>📈 到達LEVEL：<b id="levelResult">1</b></div>
+   <div class="rules" style="text-align:center">🐟 キャッチ数：<b id="caughtResult">0</b><br>🔥 最大コンボ：<b id="comboResult">0</b><br>📈 到達LEVEL：<b id="levelResult">1</b><br>🐟 所持魚：<b id="bankResult">0</b></div>
    <button id="retryBtn">↻ RETRY</button><div class="small">G.B.G — SMALL GAMES. BIG FUN.</div>
   </div>
  </div>
 </div>
 <script>
-const game=document.getElementById("game"),cat=document.getElementById("cat"),scoreEl=document.getElementById("score"),lifeEl=document.getElementById("life"),levelEl=document.getElementById("level"),missEl=document.getElementById("miss"),comboEl=document.getElementById("combo"),damageEl=document.getElementById("damage");
+const game=document.getElementById("game"),cat=document.getElementById("cat"),scoreEl=document.getElementById("score"),lifeEl=document.getElementById("life"),levelEl=document.getElementById("level"),missEl=document.getElementById("miss"),bankEl=document.getElementById("bank"),comboEl=document.getElementById("combo"),damageEl=document.getElementById("damage");
 const startScreen=document.getElementById("start"),resultScreen=document.getElementById("result");
 let playing=false,score=0,life=3,miss=0,combo=0,maxCombo=0,caught=0,items=[],spawnTimer=0,lastTime=0,elapsed=0,level=1,fever=false,feverTimer=0,slowUntil=0;
-let best=Number(localStorage.getItem("gbgCatBest")||0);document.getElementById("bestStart").textContent=best;
+let best=Number(localStorage.getItem("gbgCatBest")||0),bank=Number(localStorage.getItem("gbgFishBank")||0);document.getElementById("bestStart").textContent=best;document.getElementById("bankStart").textContent=bank;bankEl.textContent=bank;
 
 function moveCat(x){
  const target=Math.max(50,Math.min(innerWidth-50,x));
@@ -89,7 +89,7 @@ function randomItem(){
 function spawnItem(){
  const d=randomItem(),el=document.createElement("div");el.className="item";el.textContent=d.icon;
  const x=10+Math.random()*Math.max(20,innerWidth-78);el.style.left=x+"px";el.style.top="-70px";game.appendChild(el);
- items.push({el,x,y:-70,speed:(3.1+level*.28)*d.speed,data:d});
+ items.push({el,x,y:-70,speed:(3.1+level*.28)*d.speed,data:d,wobble:Math.random()*6.28,wobbleAmp:level>=5?8+Math.random()*14:0});
 }
 function effect(t,x,y,c="#ffd700"){const e=document.createElement("div");e.className="effect";e.textContent=t;e.style.left=x+"px";e.style.top=y+"px";e.style.color=c;game.appendChild(e);setTimeout(()=>e.remove(),700)}
 function vib(p){if(navigator.vibrate)navigator.vibrate(p)}
@@ -114,6 +114,7 @@ function catchItem(it){
    slowUntil=performance.now()+3000;effect("SLOW!",it.x+30,it.y,"#70d7ff");vib(35);
  }
  combo++;caught++;maxCombo=Math.max(maxCombo,combo);
+ if(["fish","rare","gold"].includes(it.data.type)){bank+=it.data.type==="gold"?5:it.data.type==="rare"?2:1;bankEl.textContent=bank;localStorage.setItem("gbgFishBank",bank)}
  let m=combo>=20?5:combo>=10?3:combo>=5?2:1,pts=it.data.score*m*(fever?2:1);score+=pts;scoreEl.textContent=score;effect("+"+pts,it.x+30,it.y);
  if(combo>=2){comboEl.textContent=combo+" COMBO ×"+m;comboEl.classList.add("show")}
  if(combo===10&&!fever)startFever();vib(18);
@@ -124,11 +125,13 @@ function loop(t){
  spawnTimer-=dt;if(spawnTimer<=0){
    spawnItem();
    if(level>=3&&Math.random()<Math.min(.55,(level-2)*.09))spawnItem();
-   if(level>=7&&Math.random()<.18)spawnItem();
+   if(level>=5&&Math.random()<.16){spawnItem();spawnItem()} if(level>=7&&Math.random()<.28)spawnItem(); if(level>=9&&Math.random()<.18){spawnItem();spawnItem();}
    spawnTimer=Math.max(190,820-level*58)+Math.random()*180;if(fever)spawnTimer*=.55
  }
  if(fever){feverTimer-=dt;if(feverTimer<=0)stopFever()}
- for(let i=items.length-1;i>=0;i--){const it=items[i];it.y+=it.speed*(dt/16);it.el.style.transform=`translateY(${it.y+70}px)`;
+ for(let i=items.length-1;i>=0;i--){const it=items[i];it.y+=it.speed*(dt/16);it.wobble+=dt*.006;
+ const wx=level>=5?Math.sin(it.wobble)*it.wobbleAmp:0;
+ it.el.style.transform=`translate(${wx}px,${it.y+70}px)`;
   if(collide(it)){catchItem(it);it.el.remove();items.splice(i,1);continue}
   if(it.y>innerHeight+80){
    if(["fish","rare","gold","mouse"].includes(it.data.type)){
@@ -148,8 +151,15 @@ function startGame(){
 function endGame(){
  playing=false;stopFever();items.forEach(i=>i.el.remove());items=[];
  if(score>best){best=score;localStorage.setItem("gbgCatBest",best)}
- document.getElementById("rank").textContent=score>=5000?"SS":score>=3000?"S":score>=1500?"A":score>=700?"B":score>=300?"C":"D";
- document.getElementById("finalScore").textContent=score;document.getElementById("bestResult").textContent=best;document.getElementById("caughtResult").textContent=caught;document.getElementById("comboResult").textContent=maxCombo;document.getElementById("levelResult").textContent=level;resultScreen.style.display="flex";
+ document.getElementById("rank").textContent=
+ score>=30000?"👑 GOLDEN CAT":
+ score>=20000?"SSS":
+ score>=12000?"SS":
+ score>=7000?"S":
+ score>=3500?"A":
+ score>=1800?"B":
+ score>=700?"C":"D";
+ document.getElementById("finalScore").textContent=score;document.getElementById("bestResult").textContent=best;document.getElementById("caughtResult").textContent=caught;document.getElementById("comboResult").textContent=maxCombo;document.getElementById("levelResult").textContent=level;document.getElementById("bankResult").textContent=bank;resultScreen.style.display="flex";
 }
 document.getElementById("startBtn").onclick=startGame;document.getElementById("retryBtn").onclick=startGame;
 ["gesturestart","gesturechange","gestureend"].forEach(n=>document.addEventListener(n,e=>e.preventDefault(),{passive:false}));
