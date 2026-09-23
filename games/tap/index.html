@@ -11,8 +11,8 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;touch-action:none;over
 body{position:fixed;inset:0}
 #game{position:relative;width:100%;height:100dvh;overflow:hidden;background:radial-gradient(circle at 50% 15%,#272000,#111 38%,#050505 78%)}
 #hud{position:absolute;top:0;left:0;width:100%;z-index:20;display:flex;justify-content:space-between;padding:max(14px,env(safe-area-inset-top)) 14px 8px;pointer-events:none}#navBtns{position:absolute;z-index:35;left:50%;top:max(15px,env(safe-area-inset-top));transform:translateX(-50%);display:flex;gap:6px}#navBtns button{width:auto;padding:8px 10px;border-radius:10px;font-size:12px;background:#111d;color:#ffd700;border:1px solid #665700}
-.box{background:#0009;border:1px solid #665700;border-radius:14px;padding:8px 12px;min-width:105px}
-.label{font-size:11px;letter-spacing:1.5px;color:#ffd700}.value{font-size:21px;font-weight:900}.right{text-align:right}
+.box{background:#0009;border:1px solid #665700;border-radius:14px;padding:8px 12px;min-width:105px}.box.right{min-width:0;width:auto;padding:8px 10px}
+.label{font-size:11px;letter-spacing:1.5px;color:#ffd700}.value{font-size:21px;font-weight:900}.right{text-align:center}.right .value{white-space:nowrap}
 #combo,#fever{position:absolute;left:50%;transform:translateX(-50%);z-index:25;font-weight:900;pointer-events:none}
 #combo{top:105px;color:#ffd700;font-size:27px;opacity:0;text-shadow:0 0 14px #ff8c00}
 #combo.show{opacity:1}
@@ -38,7 +38,7 @@ button{width:100%;border:0;border-radius:15px;padding:16px;font-size:20px;font-w
   <div class="box"><div class="label">SCORE</div><div class="value" id="score">0</div><div class="label">LEVEL <span id="level">1</span></div><div class="label">🐟 BANK <span id="bank">0</span></div></div>
   <div class="box right"><div class="label">LIFE</div><div class="value" id="life">❤️❤️❤️</div></div>
  </div>
- <div id="navBtns"><button id="homeBtn">⌂ HOME</button><button id="pauseBtn">Ⅱ 中断</button></div><div id="combo"></div><div id="fever">🔥 FEVER 🔥</div>
+ <div id="navBtns"><button id="pauseBtn">Ⅱ 中断</button></div><div id="combo"></div><div id="fever">🔥 FEVER 🔥</div>
  <div id="cat">🐱</div><div id="ground"></div><div id="damage"></div>
 
  <div class="overlay" id="start">
@@ -178,7 +178,7 @@ function goHome(){location.href="../../";}
 function pauseGame(){if(!playing||paused)return;paused=true;pauseStarted=performance.now();pauseScreen.style.display="flex"}
 function resumeGame(){if(!playing||!paused)return;const now=performance.now(),gap=now-pauseStarted;if(slowUntil>pauseStarted)slowUntil+=gap;paused=false;pauseScreen.style.display="none";lastTime=now;requestAnimationFrame(loop)}
 function quitGame(){paused=false;playing=false;pauseScreen.style.display="none";items.forEach(i=>i.el.remove());items=[];stopFever();pauseBtn.style.display="none";resultScreen.style.display="none";room.style.display="none";startScreen.style.display="flex";document.getElementById("bestStart").textContent=best;document.getElementById("bankStart").textContent=bank}
-document.getElementById("homeBtn").onclick=goHome;document.getElementById("startHomeBtn").onclick=goHome;document.getElementById("pauseHomeBtn").onclick=goHome;pauseBtn.onclick=pauseGame;document.getElementById("resumeBtn").onclick=resumeGame;document.getElementById("quitBtn").onclick=quitGame;pauseBtn.style.display="none";
+document.getElementById("startHomeBtn").onclick=goHome;document.getElementById("pauseHomeBtn").onclick=goHome;pauseBtn.onclick=pauseGame;document.getElementById("resumeBtn").onclick=resumeGame;document.getElementById("quitBtn").onclick=quitGame;pauseBtn.style.display="none";
 
 document.getElementById("startBtn").onclick=startGame;document.getElementById("retryBtn").onclick=startGame;
 ["gesturestart","gesturechange","gestureend"].forEach(n=>document.addEventListener(n,e=>e.preventDefault(),{passive:false}));
