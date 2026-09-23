@@ -47,7 +47,7 @@ button{width:100%;border:0;border-radius:15px;padding:16px;font-size:20px;font-w
    <div class="sub">魚を集めて、爆弾をよけろ！</div>
    <div class="rules">🐟 魚　+10<br>🐠 レア魚　+30<br>✨ 金の魚　+100<br>🐭 ネズミ　+50<br>🐡 フグ　3秒スロー<br>🥫 猫缶　ライフ回復<br>💣 爆弾　ライフ -1<br><br>🐟 普通の魚だけBANK +1<br>🐟 取り逃すとコンボ終了<br>📈 LEVELが上がるほど速く＆大量に！<br>🔥 10 COMBOでFEVER！</div>
    <div class="best">🏆 BEST <span id="bestStart">0</span>　🐟 <span id="bankStart">0</span></div>
-   <button id="startBtn">▶ START</button><button id="roomBtn" class="roomBtn">🐾 ねこの部屋</button><div class="small">猫を指で左右に動かそう</div>
+   <button id="startBtn">▶ START</button><button id="roomBtn" class="roomBtn">🐾 ねこの部屋</button><button id="startHomeBtn" class="roomBtn">⌂ G.B.G HOMEへ戻る</button><div class="small">猫を指で左右に動かそう</div>
   </div>
  </div>
 
@@ -178,7 +178,7 @@ function goHome(){location.href="../../";}
 function pauseGame(){if(!playing||paused)return;paused=true;pauseStarted=performance.now();pauseScreen.style.display="flex"}
 function resumeGame(){if(!playing||!paused)return;const now=performance.now(),gap=now-pauseStarted;if(slowUntil>pauseStarted)slowUntil+=gap;paused=false;pauseScreen.style.display="none";lastTime=now;requestAnimationFrame(loop)}
 function quitGame(){paused=false;playing=false;pauseScreen.style.display="none";items.forEach(i=>i.el.remove());items=[];stopFever();pauseBtn.style.display="none";resultScreen.style.display="none";room.style.display="none";startScreen.style.display="flex";document.getElementById("bestStart").textContent=best;document.getElementById("bankStart").textContent=bank}
-document.getElementById("homeBtn").onclick=goHome;document.getElementById("pauseHomeBtn").onclick=goHome;pauseBtn.onclick=pauseGame;document.getElementById("resumeBtn").onclick=resumeGame;document.getElementById("quitBtn").onclick=quitGame;pauseBtn.style.display="none";
+document.getElementById("homeBtn").onclick=goHome;document.getElementById("startHomeBtn").onclick=goHome;document.getElementById("pauseHomeBtn").onclick=goHome;pauseBtn.onclick=pauseGame;document.getElementById("resumeBtn").onclick=resumeGame;document.getElementById("quitBtn").onclick=quitGame;pauseBtn.style.display="none";
 
 document.getElementById("startBtn").onclick=startGame;document.getElementById("retryBtn").onclick=startGame;
 ["gesturestart","gesturechange","gestureend"].forEach(n=>document.addEventListener(n,e=>e.preventDefault(),{passive:false}));
