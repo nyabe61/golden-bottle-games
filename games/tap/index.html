@@ -86,7 +86,7 @@ document.addEventListener("pointerdown",e=>{if(playing)moveCat(e.clientX)},{pass
 document.addEventListener("pointermove",e=>{if(playing){e.preventDefault();moveCat(e.clientX)}},{passive:false});
 
 function bombChance(){return Math.min(.30,.08+level*.025)}
-function startBossWave(lv){bossWave=true;bossTimer=10000;bossTriggered.add(lv);game.classList.add("bosswave");const b=document.getElementById("bossBanner");b.classList.remove("show");void b.offsetWidth;b.classList.add("show");effect("10秒 生き残れ！",innerWidth/2,innerHeight*.43,"#ff5555");vib([80,50,80])}
+function startBossWave(lv){bossWave=true;bossTimer=10000;spawnTimer=0;bossTriggered.add(lv);game.classList.add("bosswave");const b=document.getElementById("bossBanner");b.classList.remove("show");void b.offsetWidth;b.classList.add("show");effect("10秒 生き残れ！",innerWidth/2,innerHeight*.43,"#ff5555");vib([80,50,80])}
 function clearBossWave(){bossWave=false;game.classList.remove("bosswave");bank+=30;localStorage.setItem("gbgFishBank",bank);bankEl.textContent=bank;document.getElementById("bankStart").textContent=bank;effect("BOSS CLEAR! 🐟 +30",innerWidth/2,innerHeight*.45,"#ffd700");vib([40,30,40,30,120])}
 function randomItem(){
  if(bossWave)return{icon:"💣",score:0,type:"bomb",speed:1.15+Math.random()*.22};
@@ -137,7 +137,7 @@ function catchItem(it){
 }
 function loop(t){
  if(!playing||paused)return;const dt=Math.min(32,t-lastTime||16);lastTime=t;elapsed+=dt;
- const nl=1+Math.floor(elapsed/15000);if(nl!==level){level=nl;levelEl.textContent=level;effect("LEVEL "+level,innerWidth/2,innerHeight*.35);if(level%10===0&&!bossTriggered.has(level))startBossWave(level)}
+ const nl=1+Math.floor(elapsed/15000);if(nl!==level){const prevLevel=level;level=nl;levelEl.textContent=level;effect("LEVEL "+level,innerWidth/2,innerHeight*.35);for(let bossLv=10;bossLv<=level;bossLv+=10){if(prevLevel<bossLv&&!bossTriggered.has(bossLv)){startBossWave(bossLv);break}}}
  if(bossWave){bossTimer-=dt;if(bossTimer<=0)clearBossWave()}
  spawnTimer-=dt;if(spawnTimer<=0){
    spawnItem();
