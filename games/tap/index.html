@@ -20,7 +20,7 @@ body{position:fixed;inset:0}
 #game.fever #fever{opacity:1}
 #game.fever{animation:pulse .45s infinite alternate}@keyframes pulse{to{filter:brightness(1.22)}}
 .item{position:absolute;width:58px;height:58px;display:flex;align-items:center;justify-content:center;font-size:46px;z-index:5;will-change:transform}
-#cat{position:absolute;left:50%;bottom:40px;transform:translateX(-50%);font-size:82px;width:100px;height:100px;display:flex;align-items:center;justify-content:center;z-index:10;will-change:left}
+#cat{position:absolute;left:50%;bottom:40px;transform:translateX(-50%);font-size:82px;width:100px;height:100px;display:flex;align-items:center;justify-content:center;z-index:10;will-change:left}#cat.invincible{animation:invBlink .16s infinite alternate}@keyframes invBlink{from{opacity:.25}to{opacity:1}}
 #ground{position:absolute;bottom:0;width:100%;height:40px;background:linear-gradient(#282000,#080808);border-top:2px solid #ffd700}
 .effect{position:absolute;z-index:40;font-size:22px;font-weight:900;pointer-events:none;animation:up .7s forwards}@keyframes up{to{opacity:0;transform:translate(-50%,-70px) scale(1.35)}}
 .overlay{position:absolute;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:24px;background:#000d;backdrop-filter:blur(7px)}
@@ -55,7 +55,7 @@ button{width:100%;border:0;border-radius:15px;padding:16px;font-size:20px;font-w
   <div class="panel">
    <div class="brand">GAME OVER</div><div id="rank">D</div><div>YOUR SCORE</div><div id="finalScore">0</div>
    <div class="best">🏆 BEST <span id="bestResult">0</span></div>
-   <div class="rules" style="text-align:center">🐟 キャッチ数：<b id="caughtResult">0</b><br>🔥 最大コンボ：<b id="comboResult">0</b><br>📈 到達LEVEL：<b id="levelResult">1</b><br>🐟 所持魚：<b id="bankResult">0</b></div>
+   <div class="rules" style="text-align:center">🐟 キャッチ数：<b id="caughtResult">0</b><br>🔥 最大コンボ：<b id="comboResult">0</b><br>📈 到達LEVEL：<b id="levelResult">1</b><br>💨 NICE DODGE：<b id="dodgeResult">0</b><br>🐟 所持魚：<b id="bankResult">0</b></div>
    <button id="retryBtn">↻ RETRY</button><button id="resultRoomBtn" class="roomBtn">🐾 ねこの部屋</button><div class="small">G.B.G — SMALL GAMES. BIG FUN.</div>
   </div>
  </div>
@@ -67,7 +67,7 @@ button{width:100%;border:0;border-radius:15px;padding:16px;font-size:20px;font-w
 <script>
 const game=document.getElementById("game"),cat=document.getElementById("cat"),scoreEl=document.getElementById("score"),lifeEl=document.getElementById("life"),levelEl=document.getElementById("level"),bankEl=document.getElementById("bank"),comboEl=document.getElementById("combo"),damageEl=document.getElementById("damage");
 const startScreen=document.getElementById("start"),resultScreen=document.getElementById("result"),room=document.getElementById("room"),unlock=document.getElementById("unlock");
-let playing=false,paused=false,pauseStarted=0,score=0,life=3,combo=0,maxCombo=0,caught=0,items=[],spawnTimer=0,lastTime=0,elapsed=0,level=1,fever=false,feverTimer=0,slowUntil=0;
+let playing=false,paused=false,pauseStarted=0,score=0,life=3,combo=0,maxCombo=0,caught=0,dodges=0,items=[],spawnTimer=0,lastTime=0,elapsed=0,level=1,fever=false,feverTimer=0,slowUntil=0,invincibleUntil=0;
 let best=Number(localStorage.getItem("gbgCatBest")||0),bank=Number(localStorage.getItem("gbgFishBank")||0);document.getElementById("bestStart").textContent=best;document.getElementById("bankStart").textContent=bank;bankEl.textContent=bank;
 const cats=[{id:"normal",icon:"🐱",name:"ノーマルねこ",cost:0,skill:"バランスタイプ"},{id:"black",icon:"🐈‍⬛",name:"くろねこ",cost:100,skill:"フグのスロー中も動きやすい"},{id:"tiger",icon:"🐯",name:"とらねこ",cost:300,skill:"FEVERが1秒長い"},{id:"boss",icon:"😼",name:"ボスねこ",cost:700,skill:"🐟のスコア +20%"},{id:"gold",icon:"👑",name:"GOLDEN CAT",cost:1500,skill:"✨のスコア +50%"}];
 let ownedCats;try{ownedCats=JSON.parse(localStorage.getItem("gbgOwnedCats")||'["normal"]')}catch(e){ownedCats=["normal"]}if(!Array.isArray(ownedCats)||!ownedCats.includes("normal"))ownedCats=["normal"];let selectedCat=localStorage.getItem("gbgSelectedCat")||"normal";if(!ownedCats.includes(selectedCat))selectedCat="normal";
@@ -99,7 +99,7 @@ function randomItem(){
 function spawnItem(){
  const d=randomItem(),el=document.createElement("div");el.className="item";el.textContent=d.icon;
  const x=10+Math.random()*Math.max(20,innerWidth-78);el.style.left=x+"px";el.style.top="-70px";game.appendChild(el);
- items.push({el,x,y:-70,speed:(3.1+level*.28)*d.speed,data:d,wobble:Math.random()*6.28,wobbleAmp:level>=5?8+Math.random()*14:0});
+ items.push({el,x,y:-70,speed:(3.1+level*.28)*d.speed,data:d,wobble:Math.random()*6.28,wobbleAmp:level>=5?8+Math.random()*14:0,dodged:false});
 }
 function effect(t,x,y,c="#ffd700"){const e=document.createElement("div");e.className="effect";e.textContent=t;e.style.left=x+"px";e.style.top=y+"px";e.style.color=c;game.appendChild(e);setTimeout(()=>e.remove(),700)}
 function vib(p){if(navigator.vibrate)navigator.vibrate(p)}
@@ -107,11 +107,14 @@ function collide(it){const a=it.el.getBoundingClientRect(),b=cat.getBoundingClie
 function startFever(){fever=true;feverTimer=(selectedCat==="tiger"?6000:5000);game.classList.add("fever");effect("FEVER!!",innerWidth/2,innerHeight/2,"#fff");vib([40,30,40,30,100])}
 function stopFever(){fever=false;game.classList.remove("fever")}
 function loseLife(text){
+ const now=performance.now();if(now<invincibleUntil){effect("SAFE!",innerWidth/2,innerHeight*.55,"#70d7ff");return}
  life--;combo=0;comboEl.classList.remove("show");
  lifeEl.textContent="❤️".repeat(Math.max(0,life))+"🖤".repeat(3-Math.max(0,life));
  damageEl.classList.remove("flash");void damageEl.offsetWidth;damageEl.classList.add("flash");
  effect(text,innerWidth/2,innerHeight*.55,"#ff4444");vib([60,40,80]);
- if(life<=0)endGame();
+ if(life<=0){endGame();return}
+ invincibleUntil=now+3000;cat.classList.add("invincible");setTimeout(()=>{if(performance.now()>=invincibleUntil)cat.classList.remove("invincible")},3050);
+ effect("3 SEC INVINCIBLE!",innerWidth/2,innerHeight*.63,"#ffd700");
 }
 function catchItem(it){
  if(it.data.type==="bomb"){loseLife("BOOM!");return}
@@ -143,6 +146,11 @@ function loop(t){
  const wx=level>=5?Math.sin(it.wobble)*it.wobbleAmp:0;
  it.el.style.transform=`translate(${wx}px,${it.y+70}px)`;
   if(collide(it)){catchItem(it);it.el.remove();items.splice(i,1);continue}
+  if(it.data.type==="bomb"&&!it.dodged&&performance.now()>=invincibleUntil){
+   const a=it.el.getBoundingClientRect(),b=cat.getBoundingClientRect(),vertical=a.bottom>b.top+15&&a.top<b.bottom-5;
+   const gap=a.right<b.left?b.left-a.right:(a.left>b.right?a.left-b.right:0);
+   if(vertical&&gap>0&&gap<=34){it.dodged=true;dodges++;score+=50;scoreEl.textContent=score;effect("NICE DODGE! +50",b.left+b.width/2,b.top-20,"#ffd700");vib(12)}
+  }
   if(it.y>innerHeight+80){
    if(["fish","rare","gold","mouse"].includes(it.data.type)){
      combo=0;comboEl.classList.remove("show");
@@ -155,7 +163,7 @@ function loop(t){
 function startGame(){
  paused=false;pauseScreen.style.display="none";
  applyCat();
- items.forEach(i=>i.el.remove());items=[];score=0;life=3;combo=0;maxCombo=0;caught=0;elapsed=0;level=1;fever=false;feverTimer=0;slowUntil=0;spawnTimer=350;
+ items.forEach(i=>i.el.remove());items=[];score=0;life=3;combo=0;maxCombo=0;caught=0;dodges=0;elapsed=0;level=1;fever=false;feverTimer=0;slowUntil=0;invincibleUntil=0;cat.classList.remove("invincible");spawnTimer=350;
  scoreEl.textContent=0;levelEl.textContent=1;lifeEl.textContent="❤️❤️❤️";comboEl.classList.remove("show");game.classList.remove("fever");startScreen.style.display="none";resultScreen.style.display="none";
  playing=true;pauseBtn.style.display="block";lastTime=performance.now();requestAnimationFrame(loop);
 }
@@ -170,13 +178,13 @@ function endGame(){
  score>=3500?"A":
  score>=1800?"B":
  score>=700?"C":"D";
- document.getElementById("finalScore").textContent=score;document.getElementById("bestResult").textContent=best;document.getElementById("caughtResult").textContent=caught;document.getElementById("comboResult").textContent=maxCombo;document.getElementById("levelResult").textContent=level;document.getElementById("bankResult").textContent=bank;resultScreen.style.display="flex";
+ document.getElementById("finalScore").textContent=score;document.getElementById("bestResult").textContent=best;document.getElementById("caughtResult").textContent=caught;document.getElementById("comboResult").textContent=maxCombo;document.getElementById("levelResult").textContent=level;document.getElementById("dodgeResult").textContent=dodges;document.getElementById("bankResult").textContent=bank;resultScreen.style.display="flex";
 }
 
 const pauseScreen=document.getElementById("pauseScreen"),pauseBtn=document.getElementById("pauseBtn");
 function goHome(){location.href="../../";}
 function pauseGame(){if(!playing||paused)return;paused=true;pauseStarted=performance.now();pauseScreen.style.display="flex"}
-function resumeGame(){if(!playing||!paused)return;const now=performance.now(),gap=now-pauseStarted;if(slowUntil>pauseStarted)slowUntil+=gap;paused=false;pauseScreen.style.display="none";lastTime=now;requestAnimationFrame(loop)}
+function resumeGame(){if(!playing||!paused)return;const now=performance.now(),gap=now-pauseStarted;if(slowUntil>pauseStarted)slowUntil+=gap;if(invincibleUntil>pauseStarted)invincibleUntil+=gap;paused=false;pauseScreen.style.display="none";lastTime=now;requestAnimationFrame(loop)}
 function quitGame(){paused=false;playing=false;pauseScreen.style.display="none";items.forEach(i=>i.el.remove());items=[];stopFever();pauseBtn.style.display="none";resultScreen.style.display="none";room.style.display="none";startScreen.style.display="flex";document.getElementById("bestStart").textContent=best;document.getElementById("bankStart").textContent=bank}
 document.getElementById("startHomeBtn").onclick=goHome;document.getElementById("pauseHomeBtn").onclick=goHome;pauseBtn.onclick=pauseGame;document.getElementById("resumeBtn").onclick=resumeGame;document.getElementById("quitBtn").onclick=quitGame;pauseBtn.style.display="none";
 
