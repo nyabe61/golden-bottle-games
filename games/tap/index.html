@@ -26,17 +26,16 @@ body{position:fixed;inset:0}
 .overlay{position:absolute;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:24px;background:#000d;backdrop-filter:blur(7px)}
 .panel{width:min(430px,100%);padding:26px 21px;text-align:center;border:2px solid #ffd700;border-radius:24px;background:linear-gradient(145deg,#171717,#080808);box-shadow:0 0 25px #ffd70033}
 .brand{font-size:11px;letter-spacing:3px;color:#ffd700}h1{font-size:36px;margin:12px 0 4px}.sub{color:#aaa;margin-bottom:15px}.rules{background:#0d0d0d;border-radius:15px;padding:14px;text-align:left;line-height:1.7;font-size:14px}.best{color:#ffd700;font-weight:bold;margin:14px}
-button{width:100%;border:0;border-radius:15px;padding:16px;font-size:20px;font-weight:900;background:#ffd700;color:#080808}
-.roomBtn{margin-top:9px;background:#171717;color:#ffd700;border:1px solid #665700}
-.catGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:12px 0;max-height:43vh;overflow:auto}.catCard{border:1px solid #393300;border-radius:15px;padding:10px 7px;background:#0d0d0d}.catCard.selected{border:2px solid #ffd700;box-shadow:0 0 14px #ffd70044}.catCard.locked .catIcon{filter:grayscale(1) brightness(.22)}.catIcon{font-size:45px}.catName{font-weight:900;font-size:14px}.catSkill{font-size:10px;color:#aaa;min-height:30px;margin:4px}.catCost{font-size:12px;color:#ffd700;margin:5px}.catCard button{padding:8px;font-size:12px}.roomHero{padding:12px;border-radius:16px;background:#151200;border:1px solid #665700;margin:10px 0}.heroIcon{font-size:65px}.heroName{font-weight:900;color:#ffd700;font-size:20px}.heroSkill{font-size:11px;color:#aaa}.collection{font-size:12px;color:#aaa}.collection b{color:#ffd700}#room,#unlock{display:none}.unlockIcon{font-size:95px;animation:catpop .55s}@keyframes catpop{from{transform:scale(.15);opacity:0}to{transform:scale(1);opacity:1}}.small{margin-top:13px;color:#777;font-size:11px}
+button{width:100%;border:0;border-radius:15px;padding:16px;font-size:20px;font-weight:900;background:#ffd700;color:#080808}.small{margin-top:13px;color:#777;font-size:11px}
 #result{display:none}#rank{font-size:54px;font-weight:900;text-shadow:0 0 20px #ffd700}#finalScore{font-size:50px;font-weight:900;color:#ffd700}
 #damage{position:absolute;inset:0;background:#f00;opacity:0;z-index:50;pointer-events:none}#damage.flash{animation:flash .25s}@keyframes flash{0%{opacity:.55}100%{opacity:0}}
+.roomBtn{margin-top:10px;background:#171717;color:#ffd700;border:1px solid #665700}#room,#unlock{display:none}.roomHero{margin:12px 0;padding:14px;border-radius:18px;background:#151200;border:1px solid #665700}.heroIcon{font-size:68px}.heroName{font-size:21px;font-weight:900;color:#ffd700}.heroSkill{font-size:11px;color:#bbb}.collection{font-size:12px;color:#aaa}.collection b{color:#ffd700}.catGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:10px 0;max-height:40vh;overflow:auto}.catCard{border:1px solid #393300;border-radius:16px;padding:10px 7px;background:#0d0d0d}.catCard.selected{border:2px solid #ffd700}.catCard.locked .catIcon{filter:grayscale(1) brightness(.22)}.catIcon{font-size:45px}.catName{font-weight:900;font-size:14px}.catSkill{font-size:10px;color:#aaa;min-height:29px}.catCost{font-size:12px;color:#ffd700;margin:6px}.catCard button{padding:8px;font-size:12px}#unlock{z-index:160;background:#000f}.unlockIcon{font-size:100px;animation:catpop .55s}@keyframes catpop{from{transform:scale(.15);opacity:0}to{transform:scale(1);opacity:1}}
 </style>
 </head>
 <body>
 <div id="game">
  <div id="hud">
-  <div class="box"><div class="label">SCORE</div><div class="value" id="score">0</div><div class="label">LEVEL <span id="level">1</span></div></div>
+  <div class="box"><div class="label">SCORE</div><div class="value" id="score">0</div><div class="label">LEVEL <span id="level">1</span></div><div class="label">🐟 BANK <span id="bank">0</span></div></div>
   <div class="box right"><div class="label">LIFE</div><div class="value" id="life">❤️❤️❤️</div></div>
  </div>
  <div id="combo"></div><div id="fever">🔥 FEVER 🔥</div>
@@ -46,8 +45,8 @@ button{width:100%;border:0;border-radius:15px;padding:16px;font-size:20px;font-w
   <div class="panel">
    <div class="brand">GOLDEN BOTTLE GAMES</div><h1>🐱 ねこキャッチ！</h1>
    <div class="sub">魚を集めて、爆弾をよけろ！</div>
-   <div class="rules">🐟 魚　+10<br>🐠 レア魚　+30<br>✨ 金の魚　+100<br>🐭 ネズミ　+50<br>🐡 フグ　3秒スロー<br>🥫 猫缶　ライフ回復<br>💣 爆弾　ライフ -1<br><br>🐟 取り逃すとコンボ終了<br>📈 LEVELが上がるほど速く＆大量に！<br>🔥 10 COMBOでFEVER！</div>
-   <div class="best">🏆 BEST <span id="bestStart">0</span>　｜　🐟 <span id="bankStart">0</span></div>
+   <div class="rules">🐟 魚　+10<br>🐠 レア魚　+30<br>✨ 金の魚　+100<br>🐭 ネズミ　+50<br>🐡 フグ　3秒スロー<br>🥫 猫缶　ライフ回復<br>💣 爆弾　ライフ -1<br><br>🐟 普通の魚だけBANK +1<br>🐟 取り逃すとコンボ終了<br>📈 LEVELが上がるほど速く＆大量に！<br>🔥 10 COMBOでFEVER！</div>
+   <div class="best">🏆 BEST <span id="bestStart">0</span>　🐟 <span id="bankStart">0</span></div>
    <button id="startBtn">▶ START</button><button id="roomBtn" class="roomBtn">🐾 ねこの部屋</button><div class="small">猫を指で左右に動かそう</div>
   </div>
  </div>
@@ -56,28 +55,23 @@ button{width:100%;border:0;border-radius:15px;padding:16px;font-size:20px;font-w
   <div class="panel">
    <div class="brand">GAME OVER</div><div id="rank">D</div><div>YOUR SCORE</div><div id="finalScore">0</div>
    <div class="best">🏆 BEST <span id="bestResult">0</span></div>
-   <div class="rules" style="text-align:center">🐟 キャッチ数：<b id="caughtResult">0</b><br>🔥 最大コンボ：<b id="comboResult">0</b><br>📈 到達LEVEL：<b id="levelResult">1</b></div>
-   <button id="retryBtn">↻ RETRY</button><div class="small">G.B.G — SMALL GAMES. BIG FUN.</div>
+   <div class="rules" style="text-align:center">🐟 キャッチ数：<b id="caughtResult">0</b><br>🔥 最大コンボ：<b id="comboResult">0</b><br>📈 到達LEVEL：<b id="levelResult">1</b><br>🐟 所持魚：<b id="bankResult">0</b></div>
+   <button id="retryBtn">↻ RETRY</button><button id="resultRoomBtn" class="roomBtn">🐾 ねこの部屋</button><div class="small">G.B.G — SMALL GAMES. BIG FUN.</div>
   </div>
  </div>
- <div class="overlay" id="room">
-  <div class="panel"><div class="brand">CAT COLLECTION</div><h1 style="font-size:29px">🐾 ねこの部屋</h1>
-   <div class="roomHero"><div class="heroIcon" id="heroIcon">🐱</div><div class="heroName" id="heroName">ノーマルねこ</div><div class="heroSkill" id="heroSkill">バランスタイプ</div></div>
-   <div class="collection">🐟 BANK <b id="roomBank">0</b>　｜　COLLECTION <b id="collection">1/5</b></div>
-   <div class="catGrid" id="catGrid"></div><button id="roomBack">← ゲームへ戻る</button>
-   <div class="small">未解放の猫は「？？？」。魚を集めて仲間にしよう。</div>
-  </div>
- </div>
- <div class="overlay" id="unlock">
-  <div class="panel"><div class="brand">NEW CAT!</div><div class="unlockIcon" id="unlockIcon">🐱</div><h1 id="unlockName">NEW CAT</h1><div class="sub">新しい猫が仲間になった！</div><button id="unlockOk">OK!</button></div>
- </div>
-
+ <div class="overlay" id="room"><div class="panel"><div class="brand">CAT COLLECTION</div><h1 style="font-size:29px">🐾 ねこの部屋</h1><div class="roomHero"><div class="heroIcon" id="heroIcon">🐱</div><div class="heroName" id="heroName">ノーマルねこ</div><div class="heroSkill" id="heroSkill">バランスタイプ</div></div><div class="collection">🐟 BANK <b id="roomBank">0</b> ｜ COLLECTION <b id="collection">1/5</b></div><div class="catGrid" id="catGrid"></div><button id="roomBack">← ゲームへ戻る</button><div class="small">未解放の猫は「？？？」。魚を集めて仲間にしよう。</div></div></div>
+ <div class="overlay" id="unlock"><div class="panel"><div class="brand">NEW CAT!</div><div class="unlockIcon" id="unlockIcon">🐱</div><h1 id="unlockName">NEW CAT</h1><div class="sub">新しい猫が仲間になった！</div><button id="unlockOk">OK!</button></div></div>
 </div>
 <script>
-const game=document.getElementById("game"),cat=document.getElementById("cat"),scoreEl=document.getElementById("score"),lifeEl=document.getElementById("life"),levelEl=document.getElementById("level"),missEl=document.getElementById("miss"),comboEl=document.getElementById("combo"),damageEl=document.getElementById("damage");
-const startScreen=document.getElementById("start"),resultScreen=document.getElementById("result");
+const game=document.getElementById("game"),cat=document.getElementById("cat"),scoreEl=document.getElementById("score"),lifeEl=document.getElementById("life"),levelEl=document.getElementById("level"),bankEl=document.getElementById("bank"),comboEl=document.getElementById("combo"),damageEl=document.getElementById("damage");
+const startScreen=document.getElementById("start"),resultScreen=document.getElementById("result"),room=document.getElementById("room"),unlock=document.getElementById("unlock");
 let playing=false,score=0,life=3,combo=0,maxCombo=0,caught=0,items=[],spawnTimer=0,lastTime=0,elapsed=0,level=1,fever=false,feverTimer=0,slowUntil=0;
-let best=Number(localStorage.getItem("gbgCatBest")||0);document.getElementById("bestStart").textContent=best;document.getElementById("bankStart").textContent=bank;
+let best=Number(localStorage.getItem("gbgCatBest")||0),bank=Number(localStorage.getItem("gbgFishBank")||0);document.getElementById("bestStart").textContent=best;document.getElementById("bankStart").textContent=bank;bankEl.textContent=bank;
+const cats=[{id:"normal",icon:"🐱",name:"ノーマルねこ",cost:0,skill:"バランスタイプ"},{id:"black",icon:"🐈‍⬛",name:"くろねこ",cost:100,skill:"フグのスロー中も動きやすい"},{id:"tiger",icon:"🐯",name:"とらねこ",cost:300,skill:"FEVERが1秒長い"},{id:"boss",icon:"😼",name:"ボスねこ",cost:700,skill:"🐟のスコア +20%"},{id:"gold",icon:"👑",name:"GOLDEN CAT",cost:1500,skill:"✨のスコア +50%"}];
+let ownedCats;try{ownedCats=JSON.parse(localStorage.getItem("gbgOwnedCats")||'["normal"]')}catch(e){ownedCats=["normal"]}if(!Array.isArray(ownedCats)||!ownedCats.includes("normal"))ownedCats=["normal"];let selectedCat=localStorage.getItem("gbgSelectedCat")||"normal";if(!ownedCats.includes(selectedCat))selectedCat="normal";
+function currentCat(){return cats.find(c=>c.id===selectedCat)||cats[0]}function saveCats(){localStorage.setItem("gbgOwnedCats",JSON.stringify(ownedCats));localStorage.setItem("gbgSelectedCat",selectedCat)}function applyCat(){cat.textContent=currentCat().icon}
+function renderRoom(){document.getElementById("roomBank").textContent=bank;document.getElementById("collection").textContent=ownedCats.length+"/"+cats.length;let c=currentCat();heroIcon.textContent=c.icon;heroName.textContent=c.name;heroSkill.textContent=c.skill;catGrid.innerHTML="";cats.forEach(c=>{let owned=ownedCats.includes(c.id),sel=selectedCat===c.id,d=document.createElement("div");d.className="catCard"+(sel?" selected":"")+(!owned?" locked":"");d.innerHTML=`<div class="catIcon">${owned?c.icon:"🐱"}</div><div class="catName">${owned?c.name:"？？？"}</div><div class="catSkill">${owned?c.skill:"能力もまだ秘密"}</div><div class="catCost">${owned?(sel?"★ 使用中":"解放済み"):"🔒 🐟 "+c.cost}</div>`;let b=document.createElement("button");b.textContent=sel?"SELECTED":owned?"この猫にする":bank>=c.cost?"解放する":"魚が足りない";b.disabled=sel||(!owned&&bank<c.cost);b.onclick=()=>{if(owned){selectedCat=c.id;saveCats();applyCat();renderRoom();return}if(bank<c.cost)return;bank-=c.cost;localStorage.setItem("gbgFishBank",bank);ownedCats.push(c.id);selectedCat=c.id;saveCats();applyCat();unlockIcon.textContent=c.icon;unlockName.textContent=c.name;unlock.style.display="flex";renderRoom()};d.appendChild(b);catGrid.appendChild(d)})}
+function openRoom(){startScreen.style.display="none";resultScreen.style.display="none";room.style.display="flex";renderRoom()}roomBtn.onclick=openRoom;resultRoomBtn.onclick=openRoom;roomBack.onclick=()=>{room.style.display="none";startScreen.style.display="flex";bankStart.textContent=bank};unlockOk.onclick=()=>unlock.style.display="none";applyCat();
 
 function moveCat(x){
  const target=Math.max(50,Math.min(innerWidth-50,x));
@@ -103,7 +97,7 @@ function randomItem(){
 function spawnItem(){
  const d=randomItem(),el=document.createElement("div");el.className="item";el.textContent=d.icon;
  const x=10+Math.random()*Math.max(20,innerWidth-78);el.style.left=x+"px";el.style.top="-70px";game.appendChild(el);
- items.push({el,x,y:-70,speed:(3.1+level*.28)*d.speed,data:d});
+ items.push({el,x,y:-70,speed:(3.1+level*.28)*d.speed,data:d,wobble:Math.random()*6.28,wobbleAmp:level>=5?8+Math.random()*14:0});
 }
 function effect(t,x,y,c="#ffd700"){const e=document.createElement("div");e.className="effect";e.textContent=t;e.style.left=x+"px";e.style.top=y+"px";e.style.color=c;game.appendChild(e);setTimeout(()=>e.remove(),700)}
 function vib(p){if(navigator.vibrate)navigator.vibrate(p)}
@@ -128,11 +122,8 @@ function catchItem(it){
    slowUntil=performance.now()+3000;effect("SLOW!",it.x+30,it.y,"#70d7ff");vib(35);
  }
  combo++;caught++;maxCombo=Math.max(maxCombo,combo);
- let m=combo>=20?5:combo>=10?3:combo>=5?2:1,baseScore=it.data.score;
- if(selectedCat==="boss"&&it.data.type==="fish")baseScore=Math.round(baseScore*1.2);
- if(selectedCat==="gold"&&it.data.type==="gold")baseScore=Math.round(baseScore*1.5);
- let pts=baseScore*m*(fever?2:1);score+=pts;
- if(it.data.type==="fish"){bank++;localStorage.setItem("gbgFishBank",bank);document.getElementById("bankStart").textContent=bank;}scoreEl.textContent=score;effect("+"+pts,it.x+30,it.y);
+ if(it.data.type==="fish"){bank+=1;bankEl.textContent=bank;document.getElementById("bankStart").textContent=bank;localStorage.setItem("gbgFishBank",bank)}
+ let m=combo>=20?5:combo>=10?3:combo>=5?2:1,baseScore=it.data.score;if(selectedCat==="boss"&&it.data.type==="fish")baseScore=Math.round(baseScore*1.2);if(selectedCat==="gold"&&it.data.type==="gold")baseScore=Math.round(baseScore*1.5);let pts=baseScore*m*(fever?2:1);score+=pts;scoreEl.textContent=score;effect("+"+pts,it.x+30,it.y);
  if(combo>=2){comboEl.textContent=combo+" COMBO ×"+m;comboEl.classList.add("show")}
  if(combo===10&&!fever)startFever();vib(18);
 }
@@ -142,11 +133,13 @@ function loop(t){
  spawnTimer-=dt;if(spawnTimer<=0){
    spawnItem();
    if(level>=3&&Math.random()<Math.min(.55,(level-2)*.09))spawnItem();
-   if(level>=7&&Math.random()<.18)spawnItem();
+   if(level>=5&&Math.random()<.16){spawnItem();spawnItem()} if(level>=7&&Math.random()<.28)spawnItem(); if(level>=9&&Math.random()<.18){spawnItem();spawnItem();}
    spawnTimer=Math.max(190,820-level*58)+Math.random()*180;if(fever)spawnTimer*=.55
  }
  if(fever){feverTimer-=dt;if(feverTimer<=0)stopFever()}
- for(let i=items.length-1;i>=0;i--){const it=items[i];it.y+=it.speed*(dt/16);it.el.style.transform=`translateY(${it.y+70}px)`;
+ for(let i=items.length-1;i>=0;i--){const it=items[i];it.y+=it.speed*(dt/16);it.wobble+=dt*.006;
+ const wx=level>=5?Math.sin(it.wobble)*it.wobbleAmp:0;
+ it.el.style.transform=`translate(${wx}px,${it.y+70}px)`;
   if(collide(it)){catchItem(it);it.el.remove();items.splice(i,1);continue}
   if(it.y>innerHeight+80){
    if(["fish","rare","gold","mouse"].includes(it.data.type)){
@@ -158,6 +151,7 @@ function loop(t){
  requestAnimationFrame(loop);
 }
 function startGame(){
+ applyCat();
  items.forEach(i=>i.el.remove());items=[];score=0;life=3;combo=0;maxCombo=0;caught=0;elapsed=0;level=1;fever=false;feverTimer=0;slowUntil=0;spawnTimer=350;
  scoreEl.textContent=0;levelEl.textContent=1;lifeEl.textContent="❤️❤️❤️";comboEl.classList.remove("show");game.classList.remove("fever");startScreen.style.display="none";resultScreen.style.display="none";
  playing=true;lastTime=performance.now();requestAnimationFrame(loop);
@@ -165,35 +159,16 @@ function startGame(){
 function endGame(){
  playing=false;stopFever();items.forEach(i=>i.el.remove());items=[];
  if(score>best){best=score;localStorage.setItem("gbgCatBest",best)}
- document.getElementById("rank").textContent=score>=5000?"SS":score>=3000?"S":score>=1500?"A":score>=700?"B":score>=300?"C":"D";
- document.getElementById("finalScore").textContent=score;document.getElementById("bestResult").textContent=best;document.getElementById("caughtResult").textContent=caught;document.getElementById("comboResult").textContent=maxCombo;document.getElementById("levelResult").textContent=level;resultScreen.style.display="flex";
+ document.getElementById("rank").textContent=
+ score>=30000?"👑 GOLDEN CAT":
+ score>=20000?"SSS":
+ score>=12000?"SS":
+ score>=7000?"S":
+ score>=3500?"A":
+ score>=1800?"B":
+ score>=700?"C":"D";
+ document.getElementById("finalScore").textContent=score;document.getElementById("bestResult").textContent=best;document.getElementById("caughtResult").textContent=caught;document.getElementById("comboResult").textContent=maxCombo;document.getElementById("levelResult").textContent=level;document.getElementById("bankResult").textContent=bank;resultScreen.style.display="flex";
 }
-
-const room=document.getElementById("room"),unlock=document.getElementById("unlock"),catGrid=document.getElementById("catGrid");
-const cats=[
-{id:"normal",icon:"🐱",name:"ノーマルねこ",cost:0,skill:"バランスタイプ"},
-{id:"black",icon:"🐈‍⬛",name:"くろねこ",cost:100,skill:"フグのスロー中も動きやすい"},
-{id:"tiger",icon:"🐯",name:"とらねこ",cost:300,skill:"FEVERが1秒長い"},
-{id:"boss",icon:"😼",name:"ボスねこ",cost:700,skill:"🐟のスコア +20%"},
-{id:"gold",icon:"👑",name:"GOLDEN CAT",cost:1500,skill:"✨のスコア +50%"}];
-let ownedCats;try{ownedCats=JSON.parse(localStorage.getItem("gbgOwnedCats")||'["normal"]')}catch(e){ownedCats=["normal"]}
-if(!Array.isArray(ownedCats)||!ownedCats.includes("normal"))ownedCats=["normal"];
-let selectedCat=localStorage.getItem("gbgSelectedCat")||"normal";
-if(!ownedCats.includes(selectedCat))selectedCat="normal";
-function currentCat(){return cats.find(c=>c.id===selectedCat)||cats[0]}
-function saveCats(){localStorage.setItem("gbgOwnedCats",JSON.stringify(ownedCats));localStorage.setItem("gbgSelectedCat",selectedCat)}
-function applyCat(){cat.textContent=currentCat().icon}
-function renderRoom(){
- const c=currentCat();document.getElementById("roomBank").textContent=bank;document.getElementById("collection").textContent=ownedCats.length+"/"+cats.length;
- document.getElementById("heroIcon").textContent=c.icon;document.getElementById("heroName").textContent=c.name;document.getElementById("heroSkill").textContent=c.skill;catGrid.innerHTML="";
- cats.forEach(c=>{let owned=ownedCats.includes(c.id),sel=selectedCat===c.id,d=document.createElement("div");d.className="catCard"+(sel?" selected":"")+(!owned?" locked":"");
- d.innerHTML=`<div class="catIcon">${owned?c.icon:"🐱"}</div><div class="catName">${owned?c.name:"？？？"}</div><div class="catSkill">${owned?c.skill:"能力もまだ秘密"}</div><div class="catCost">${owned?(sel?"★ 使用中":"解放済み"):"🔒 🐟 "+c.cost}</div>`;
- let b=document.createElement("button");b.textContent=sel?"SELECTED":owned?"この猫にする":bank>=c.cost?"解放する":"魚が足りない";b.disabled=sel||(!owned&&bank<c.cost);
- b.onclick=()=>{if(owned){selectedCat=c.id;saveCats();applyCat();renderRoom();return}bank-=c.cost;localStorage.setItem("gbgFishBank",bank);ownedCats.push(c.id);selectedCat=c.id;saveCats();applyCat();document.getElementById("unlockIcon").textContent=c.icon;document.getElementById("unlockName").textContent=c.name;unlock.style.display="flex";renderRoom()};d.appendChild(b);catGrid.appendChild(d)})
-}
-function openRoom(){startScreen.style.display="none";resultScreen.style.display="none";room.style.display="flex";renderRoom()}
-document.getElementById("roomBtn").onclick=openRoom;document.getElementById("roomBack").onclick=()=>{room.style.display="none";startScreen.style.display="flex";document.getElementById("bankStart").textContent=bank};document.getElementById("unlockOk").onclick=()=>unlock.style.display="none";applyCat();
-
 document.getElementById("startBtn").onclick=startGame;document.getElementById("retryBtn").onclick=startGame;
 ["gesturestart","gesturechange","gestureend"].forEach(n=>document.addEventListener(n,e=>e.preventDefault(),{passive:false}));
 let lastEnd=0;document.addEventListener("touchend",e=>{const n=Date.now();if(n-lastEnd<=300)e.preventDefault();lastEnd=n},{passive:false});
